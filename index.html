@@ -133,10 +133,11 @@
         alert('請輸入所有玩家的名稱');
         return;
       }
-      // 顯示記分區
-      document.querySelector('.player-names').style.display = 'none';
-      document.querySelector('.score-input').style.display = 'block';
-      document.querySelector('.score-table').style.display = 'block';
+      
+      // 顯示記分區並隱藏玩家名稱區域
+      document.querySelector('.player-names').style.display = 'none'; // 隱藏玩家名稱區域
+      document.querySelector('.score-input').style.display = 'block'; // 顯示記分區域
+      document.querySelector('.score-table').style.display = 'block'; // 顯示分數表格區域
 
       // 初始化記分輸入表單
       playerScoresDiv.innerHTML = players.map(player => `
