@@ -35,7 +35,7 @@
   <h1>大德13支大戰</h1>
 
   <!-- 玩家設定 -->
-  <section class="player-setup" style="display: block;">
+  <section class="player-setup">
     <h2>選擇玩家數量</h2>
     <form id="player-setup-form">
       <label for="player-count">選擇玩家數量：</label>
@@ -92,7 +92,7 @@
     let scores = [];
 
     // 設定玩家數量
-    playerSetupForm.addEventListener('submit', (e) => {
+    playerSetupForm.addEventListener('submit', function (e) {
       e.preventDefault();
       const playerCount = parseInt(document.getElementById('player-count').value);
 
@@ -113,7 +113,7 @@
     });
 
     // 提交玩家名稱並開始計分
-    playerNamesForm.addEventListener('submit', (e) => {
+    playerNamesForm.addEventListener('submit', function (e) {
       e.preventDefault();
 
       // 獲取玩家名稱
@@ -140,7 +140,7 @@
     });
 
     // 記錄分數
-    scoreForm.addEventListener('submit', (e) => {
+    scoreForm.addEventListener('submit', function (e) {
       e.preventDefault();
 
       const currentScores = players.map(player => {
