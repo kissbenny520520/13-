@@ -162,7 +162,7 @@
         `).join('');
 
         // 初始化表頭
-        playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
+        playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
         
         // 更新分數表
         updateScoreTable();
@@ -174,9 +174,9 @@
       scoreRecords.innerHTML = '';
       
       // 反轉分數順序，讓最後一場顯示在最上面
-      scores.slice().reverse().forEach(round => {
+      scores.slice().reverse().forEach((round, index) => {
         const row = document.createElement('tr');
-        row.innerHTML = round.scores.map(score => `<td>${score}</td>`).join('');
+        row.innerHTML = `<td>${index + 1}</td>` + round.scores.map(score => `<td>${score}</td>`).join('');
         row.innerHTML += `<td class="bonus-column">${round.bonus}</td>`;
         scoreRecords.appendChild(row);
       });
@@ -250,7 +250,7 @@
       `).join('');
 
       // 初始化表頭
-      playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
+      playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
 
       // 儲存玩家資料
       localStorage.setItem('players', JSON.stringify(players));
