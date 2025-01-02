@@ -48,16 +48,21 @@
     </form>
   </section>
 
-  <script>
-    const playerSetupForm = document.getElementById('player-setup-form');
-    const playerNamesForm = document.getElementById('player-names-form');
-    const playerNameFields = document.getElementById('player-name-fields');
+  <!-- 記分區 -->
+  <section class="section" id="score-input" style="display: none;">
+    <h2>開始記分</h2>
+    <p>這是記分區</p>
+    <form id="score-form">
+      <div id="player-scores"></div>
+      <button type="submit">新增比賽結果</button>
+    </form>
+  </section>
 
-    // 設定玩家數量
-    playerSetupForm.addEventListener('submit', function (e) {
+  <script>
+    // 選擇玩家數量並顯示玩家名稱頁面
+    document.getElementById('player-setup-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const playerCount = parseInt(document.getElementById('player-count').value);
-
       if (playerCount < 3 || playerCount > 5) {
         alert('請選擇3至5位玩家');
         return;
@@ -68,25 +73,34 @@
       document.getElementById('player-names').style.display = 'block';
 
       // 動態生成玩家名稱輸入欄位
+      const playerNameFields = document.getElementById('player-name-fields');
       playerNameFields.innerHTML = Array.from({ length: playerCount }, (_, i) => `
         <label for="player-${i}">玩家 ${i + 1} 名稱：</label>
         <input type="text" id="player-${i}" required>
       `).join('');
     });
 
-    // 提交玩家名稱並開始計分
-    playerNamesForm.addEventListener('submit', function (e) {
+    // 提交玩家名稱並進入記分頁面
+    document.getElementById('player-names-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      // 獲取玩家名稱
-      const players = Array.from({ length: playerNameFields.children.length }, (_, i) => document.getElementById(`player-${i}`).value.trim());
 
-      if (players.some(player => player === "")) {
-        alert("請填寫所有玩家名稱！");
-        return;
+      // 獲取玩家名稱
+      const players = [];
+      const playerNameFields = document.getElementById('player-name-fields');
+      for (let i = 0; i < playerNameFields.children.length; i++) {
+        const playerName = document.getElementById(`player-${i}`).value.trim();
+        if (!playerName) {
+          alert("請填寫所有玩家名稱！");
+          return;
+        }
+        players.push(playerName);
       }
 
-      // 顯示玩家名稱後續操作，或者開始計分
       console.log("玩家名稱:", players);
+
+      // 顯示記分頁面
+      document.getElementById('player-names').style.display = 'none';
+      document.getElementById('score-input').style.display = 'block';
     });
   </script>
 </body>
