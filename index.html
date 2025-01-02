@@ -20,15 +20,6 @@
       display: block;
       margin: 10px 0;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-    }
   </style>
 </head>
 <body>
@@ -66,30 +57,13 @@
     </form>
   </section>
 
-  <!-- 分數表 -->
-  <section class="section" id="score-table" style="display: none;">
-    <h2>分數表</h2>
-    <table>
-      <thead>
-        <tr id="player-headers"></tr>
-      </thead>
-      <tbody id="score-records"></tbody>
-    </table>
-    <h3>總得分</h3>
-    <ul id="total-scores"></ul>
-  </section>
-
   <script>
     const playerSetupForm = document.getElementById('player-setup-form');
     const playerNamesForm = document.getElementById('player-names-form');
     const scoreForm = document.getElementById('score-form');
-    const playerScoresDiv = document.getElementById('player-scores');
     const playerNameFields = document.getElementById('player-name-fields');
-    const playerHeaders = document.getElementById('player-headers');
-    const scoreRecords = document.getElementById('score-records');
-    const totalScoresList = document.getElementById('total-scores');
+    const playerScoresDiv = document.getElementById('player-scores');
     let players = [];
-    let scores = [];
 
     // 設定玩家數量
     playerSetupForm.addEventListener('submit', function (e) {
@@ -127,54 +101,26 @@
       // 顯示計分頁面
       document.getElementById('player-names').style.display = 'none';
       document.getElementById('score-input').style.display = 'block';
-      document.getElementById('score-table').style.display = 'block';
 
       // 初始化記分輸入表單
       playerScoresDiv.innerHTML = players.map(player => `
         <label for="${player}">${player}：</label>
         <input type="number" id="${player}" name="${player}" required>
       `).join('');
-
-      // 初始化表頭
-      playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
     });
 
     // 記錄分數
     scoreForm.addEventListener('submit', function (e) {
       e.preventDefault();
-
       const currentScores = players.map(player => {
         const score = parseInt(document.getElementById(player).value, 10);
         return isNaN(score) ? 0 : score;
       });
 
-      // 檢查每場分數加總是否為0
-      const totalScore = currentScores.reduce((sum, score) => sum + score, 0);
-      if (totalScore !== 0) {
-        alert("本場分數總和必須為 0！");
-        return;
-      }
-
-      scores.push(currentScores);
-
-      // 更新分數並儲存
-      sessionStorage.setItem('scores', JSON.stringify(scores));
-
-      // 更新分數表格
-      updateScoreTable();
-
+      console.log('本場分數:', currentScores);
       // 清空輸入欄位
       scoreForm.reset();
     });
-
-    // 更新分數表格
-    function updateScoreTable() {
-      const rows = scores.map(score => `<tr>${score.map(s => `<td>${s}</td>`).join('')}</tr>`).join('');
-      scoreRecords.innerHTML = rows;
-
-      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round[i], 0));
-      totalScoresList.innerHTML = players.map((player, i) => `<li>${player}: ${totalScores[i]}</li>`).join('');
-    }
   </script>
 </body>
 </html>
