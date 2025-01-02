@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>遊戲記分網頁</title>
+  <title>大德13支大戰</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -32,18 +32,36 @@
     th {
       background-color: #f4f4f4;
     }
+    .error {
+      color: red;
+      font-size: 14px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <h1>大德13記帳</h1>
+  <h1>大德13支大戰</h1>
 
-  <!-- 玩家設定 -->
+  <!-- 玩家人數選擇 -->
   <section class="player-setup">
-    <h2>設定玩家</h2>
-    <form id="player-setup-form">
-      <label for="players">輸入玩家名稱（以逗號分隔，例如：A,B,C,D）：</label>
-      <input type="text" id="players" required>
+    <h2>選擇玩家人數</h2>
+    <form id="player-count-form">
+      <label for="player-count">選擇玩家數量（3人、4人或5人）：</label>
+      <select id="player-count" required>
+        <option value="3">3人</option>
+        <option value="4">4人</option>
+        <option value="5">5人</option>
+      </select>
       <button type="submit">開始遊戲</button>
+    </form>
+  </section>
+
+  <!-- 設定玩家名稱 -->
+  <section class="player-names" style="display: none;">
+    <h2>輸入玩家名稱</h2>
+    <form id="player-names-form">
+      <div id="player-name-inputs"></div>
+      <button type="submit">開始記分</button>
     </form>
   </section>
 
@@ -52,16 +70,20 @@
     <h2>輸入每場分數</h2>
     <form id="score-form">
       <div id="player-scores"></div>
+      <label for="bonus">彩金：</label>
+      <input type="text" id="bonus" name="bonus" placeholder="輸入彩金備註">
       <button type="submit">新增比賽結果</button>
     </form>
+    <div id="error-message" class="error" style="display: none;"></div>
   </section>
 
   <!-- 分數表 -->
   <section class="score-table" style="display: none;">
-    <h2> 記帳區  </h2>
+    <h2>分數表</h2>
     <table>
       <thead>
         <tr id="player-headers"></tr>
+        <th>彩金</th>
       </thead>
       <tbody id="score-records"></tbody>
     </table>
@@ -70,25 +92,49 @@
   </section>
 
   <script>
-    const playerSetupForm = document.getElementById('player-setup-form');
-    const scoreForm = document.getElementById('score-form');
+    const playerCountForm = document.getElementById('player-count-form');
+    const playerNamesForm = document.getElementById('player-names-form');
+    const playerNameInputsDiv = document.getElementById('player-name-inputs');
     const playerScoresDiv = document.getElementById('player-scores');
     const playerHeaders = document.getElementById('player-headers');
     const scoreRecords = document.getElementById('score-records');
     const totalScoresList = document.getElementById('total-scores');
+    const errorMessage = document.getElementById('error-message');
+    const bonusInput = document.getElementById('bonus');
     let players = [];
     let scores = [];
 
-    // 設定玩家
-    playerSetupForm.addEventListener('submit', (e) => {
+    // 玩家人數選擇
+    playerCountForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      players = document.getElementById('players').value.split(',').map(name => name.trim());
-      if (players.length < 3 || players.length > 5) {
-        alert('請輸入3到5位玩家名稱');
+      const playerCount = parseInt(document.getElementById('player-count').value, 10);
+      if (playerCount < 3 || playerCount > 5) {
+        alert('請選擇3至5位玩家');
+        return;
+      }
+      // 顯示玩家名稱輸入區域
+      document.querySelector('.player-setup').style.display = 'none';
+      document.querySelector('.player-names').style.display = 'block';
+
+      // 根據選擇的玩家數量顯示對應的輸入框
+      playerNameInputsDiv.innerHTML = Array.from({ length: playerCount }).map((_, i) => `
+        <label for="player${i + 1}">玩家 ${i + 1} 名字：</label>
+        <input type="text" id="player${i + 1}" name="player${i + 1}" required>
+      `).join('');
+    });
+
+    // 設定玩家名稱
+    playerNamesForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      players = Array.from({ length: document.querySelectorAll('input[type="text"]').length })
+        .map((_, i) => document.getElementById(`player${i + 1}`).value.trim());
+
+      if (players.some(name => name === '')) {
+        alert('請輸入所有玩家的名稱');
         return;
       }
       // 顯示記分區
-      document.querySelector('.player-setup').style.display = 'none';
+      document.querySelector('.player-names').style.display = 'none';
       document.querySelector('.score-input').style.display = 'block';
       document.querySelector('.score-table').style.display = 'block';
 
@@ -100,28 +146,46 @@
 
       // 初始化表頭
       playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
+      playerHeaders.innerHTML += `<th>彩金</th>`;  // Add the "彩金" column header
     });
 
     // 記錄分數
+    const scoreForm = document.getElementById('score-form');
     scoreForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const currentScores = players.map(player => {
         const score = parseInt(document.getElementById(player).value, 10);
         return isNaN(score) ? 0 : score;
       });
-      scores.push(currentScores);
+
+      // 檢查分數加總是否為0
+      const totalScore = currentScores.reduce((sum, score) => sum + score, 0);
+      if (totalScore !== 0) {
+        errorMessage.style.display = 'block';
+        errorMessage.textContent = '此場比賽的總分數必須為0，請重新檢查分數。';
+        return;
+      } else {
+        errorMessage.style.display = 'none';
+      }
+
+      const bonus = bonusInput.value.trim();
+
+      // 更新分數
+      scores.push({ scores: currentScores, bonus });
 
       // 更新表格
       const row = document.createElement('tr');
       row.innerHTML = currentScores.map(score => `<td>${score}</td>`).join('');
+      row.innerHTML += `<td>${bonus}</td>`;  // Add the bonus value to the table row
       scoreRecords.appendChild(row);
 
       // 計算總得分
-      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round[i], 0));
+      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
       totalScoresList.innerHTML = players.map((player, i) => `<li>${player}: ${totalScores[i]}</li>`).join('');
 
       // 清空輸入欄位
       scoreForm.reset();
+      bonusInput.value = '';
     });
   </script>
 </body>
