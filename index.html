@@ -162,7 +162,7 @@
         `).join('');
 
         // 初始化表頭
-        playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
+        playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
         
         // 更新分數表
         updateScoreTable();
@@ -252,7 +252,7 @@
       `).join('');
 
       // 初始化表頭
-      playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
+      playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
 
       // 儲存玩家資料
       localStorage.setItem('players', JSON.stringify(players));
