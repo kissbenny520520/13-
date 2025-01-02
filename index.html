@@ -52,14 +52,10 @@
   <section class="section" id="score-input" style="display: none;">
     <h2>開始記分</h2>
     <p>這是記分區</p>
-    <form id="score-form">
-      <div id="player-scores"></div>
-      <button type="submit">新增比賽結果</button>
-    </form>
   </section>
 
   <script>
-    // 選擇玩家數量並顯示玩家名稱頁面
+    // 設定玩家數量並顯示玩家名稱頁面
     document.getElementById('player-setup-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const playerCount = parseInt(document.getElementById('player-count').value);
