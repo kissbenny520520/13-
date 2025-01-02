@@ -132,6 +132,11 @@
       // 獲取玩家名稱
       players = Array.from({ length: playerNameFields.children.length }, (_, i) => document.getElementById(`player-${i}`).value.trim());
 
+      if (players.some(player => player === "")) {
+        alert("請填寫所有玩家名稱！");
+        return;
+      }
+
       // 顯示記分區
       document.querySelector('.player-names').style.display = 'none';
       document.querySelector('.score-input').style.display = 'block';
