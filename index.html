@@ -95,12 +95,12 @@
     playerSetupForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const playerCount = parseInt(document.getElementById('player-count').value);
+      console.log("玩家數量選擇:", playerCount);  // 確認玩家數量
+
       if (playerCount < 3 || playerCount > 5) {
         alert('請選擇3至5位玩家');
         return;
       }
-
-      console.log("玩家數量選擇:", playerCount);  // 設置調試訊息
 
       // 顯示玩家名稱輸入區
       document.querySelector('.player-setup').style.display = 'none';
@@ -119,13 +119,12 @@
 
       // 獲取玩家名稱
       players = Array.from({ length: playerNameFields.children.length }, (_, i) => document.getElementById(`player-${i}`).value.trim());
+      console.log("玩家名稱:", players);  // 確認玩家名稱
 
       if (players.some(player => player === "")) {
         alert("請填寫所有玩家名稱！");
         return;
       }
-
-      console.log("玩家名稱:", players);  // 設置調試訊息
 
       // 顯示計分頁面
       document.querySelector('.player-names').style.display = 'none';
