@@ -95,8 +95,6 @@
     playerSetupForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const playerCount = parseInt(document.getElementById('player-count').value);
-      console.log("玩家數量選擇:", playerCount);  // 確認玩家數量
-
       if (playerCount < 3 || playerCount > 5) {
         alert('請選擇3至5位玩家');
         return;
@@ -119,7 +117,6 @@
 
       // 獲取玩家名稱
       players = Array.from({ length: playerNameFields.children.length }, (_, i) => document.getElementById(`player-${i}`).value.trim());
-      console.log("玩家名稱:", players);  // 確認玩家名稱
 
       if (players.some(player => player === "")) {
         alert("請填寫所有玩家名稱！");
@@ -144,10 +141,19 @@
     // 記錄分數
     scoreForm.addEventListener('submit', (e) => {
       e.preventDefault();
+
       const currentScores = players.map(player => {
         const score = parseInt(document.getElementById(player).value, 10);
         return isNaN(score) ? 0 : score;
       });
+
+      // 檢查每場分數加總是否為0
+      const totalScore = currentScores.reduce((sum, score) => sum + score, 0);
+      if (totalScore !== 0) {
+        alert("本場分數總和必須為 0！");
+        return;
+      }
+
       scores.push(currentScores);
 
       // 更新表格
