@@ -87,7 +87,22 @@
     <form id="score-form">
       <div id="player-scores"></div>
       <label for="bonus">彩金：</label>
-      <input type="text" id="bonus" name="bonus" placeholder="輸入彩金備註">
+      <select id="bonus" name="bonus">
+        <option value="">-- 請選擇彩金 --</option>
+        <option value="A">A</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="J">J</option>
+        <option value="Q">Q</option>
+        <option value="K">K</option>
+      </select>
       <button type="submit">新增此場輸贏</button>
     </form>
     <div id="error-message" class="error" style="display: none;"></div>
