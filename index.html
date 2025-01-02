@@ -157,7 +157,7 @@
       `).join('');
 
       // 初始化表頭
-      playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
+      playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
     });
 
     // 記錄分數
