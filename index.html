@@ -63,7 +63,7 @@
       margin-right: 10px;
     }
     .score-input input {
-      width: 50%; /* 調整積分輸入欄位的寬度 */
+      width: 3ch; /* 使每個輸入框的寬度適應三個字 */
     }
   </style>
 </head>
@@ -125,13 +125,9 @@
         <tr id="player-headers"></tr>
       </thead>
       <tbody id="score-records"></tbody>
-    </table>
-    <h3 class="total-heading">總計</h3>
-    <table>
-      <thead>
-        <tr id="total-player-headers"></tr>
-      </thead>
-      <tbody id="total-score-records"></tbody>
+      <tfoot id="total-records">
+        <!-- 總計將會顯示在這裡 -->
+      </tfoot>
     </table>
     <button type="button" id="reset-scores" style="margin-top: 40px;">本日輸贏歸零</button>
   </section>
@@ -143,8 +139,7 @@
     const playerScoresDiv = document.getElementById('player-scores');
     const playerHeaders = document.getElementById('player-headers');
     const scoreRecords = document.getElementById('score-records');
-    const totalPlayerHeaders = document.getElementById('total-player-headers');
-    const totalScoreRecords = document.getElementById('total-score-records');
+    const totalRecords = document.getElementById('total-records');
     const errorMessage = document.getElementById('error-message');
     const bonusInput = document.getElementById('bonus');
     const resetScoresButton = document.getElementById('reset-scores');
@@ -191,12 +186,10 @@
       });
 
       const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
-      totalScoreRecords.innerHTML = '';
+      totalRecords.innerHTML = '';
       const totalRow = document.createElement('tr');
-      totalRow.innerHTML = totalScores.map(score => `<td>${score}</td>`).join('');
-      totalScoreRecords.appendChild(totalRow);
-
-      totalPlayerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
+      totalRow.innerHTML = `<td>合計</td>` + totalScores.map(score => `<td>${score}</td>`).join('');
+      totalRecords.appendChild(totalRow);
     }
 
     playerCountForm.addEventListener('submit', function(e) {
@@ -308,7 +301,7 @@
         scores = [];
         playerScoresDiv.innerHTML = '';
         scoreRecords.innerHTML = '';
-        totalScoreRecords.innerHTML = '';
+        totalRecords.innerHTML = '';
         document.querySelector('.player-setup').style.display = 'block';
         document.querySelector('.player-names').style.display = 'none';
         document.querySelector('.score-input').style.display = 'none';
