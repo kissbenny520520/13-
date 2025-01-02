@@ -14,6 +14,9 @@
       color: red;
       font-weight: bold;
     }
+    h1 {
+      margin: 0;
+    }
     .player-setup, .player-names, .score-input, .score-table {
       margin: 20px auto;
       max-width: 600px;
@@ -47,7 +50,7 @@
       text-align: center;
       color: red;
       font-weight: bold;
-      font-size: 24px;
+      font-size: 24px; /* 調整字體大小 */
     }
   </style>
 </head>
@@ -57,15 +60,15 @@
 
   <!-- 玩家人數選擇 -->
   <section class="player-setup">
-    <h2>選擇玩家人數</h2>
+    <h2> 玩家數量 </h2>
     <form id="player-count-form">
-      <label for="player-count">選擇玩家數量（3人、4人或5人）：</label>
+      <label for="player-count">選擇人數：</label>
       <select id="player-count" required>
         <option value="3">3人</option>
         <option value="4">4人</option>
         <option value="5">5人</option>
       </select>
-      <button type="submit">開始遊戲</button>
+      <button type="submit">開始輸贏</button>
     </form>
   </section>
 
@@ -107,7 +110,7 @@
 
   <!-- 分數表 -->
   <section class="score-table" style="display: none;">
-    <h2>統計</h2>
+    <h2>每場詳細</h2>
     <table>
       <thead>
         <tr id="player-headers"></tr>
@@ -141,11 +144,62 @@
     let players = [];
     let scores = [];
 
+    // 從 localStorage 加載資料
+    function loadData() {
+      players = JSON.parse(localStorage.getItem('players')) || [];
+      scores = JSON.parse(localStorage.getItem('scores')) || [];
+
+      if (players.length > 0) {
+        document.querySelector('.player-setup').style.display = 'none';
+        document.querySelector('.player-names').style.display = 'none';
+        document.querySelector('.score-input').style.display = 'block';
+        document.querySelector('.score-table').style.display = 'block';
+        
+        // 初始化記分輸入表單
+        playerScoresDiv.innerHTML = players.map(player => `
+          <label for="${player}">${player}：</label>
+          <input type="number" id="${player}" name="${player}" required>
+        `).join('');
+
+        // 初始化表頭
+        playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
+        
+        // 更新分數表
+        updateScoreTable();
+      }
+    }
+
+    // 更新分數表
+    function updateScoreTable() {
+      scoreRecords.innerHTML = '';
+      scores.forEach(round => {
+        const row = document.createElement('tr');
+        row.innerHTML = round.scores.map(score => `<td>${score}</td>`).join('');
+        row.innerHTML += `<td class="bonus-column">${round.bonus}</td>`;
+        scoreRecords.appendChild(row);
+      });
+
+      // 計算總得分
+      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
+
+      // 更新總計表格
+      totalScoreRecords.innerHTML = '';
+      const totalRow = document.createElement('tr');
+      totalRow.innerHTML = totalScores.map(score => `<td>${score}</td>`).join('');
+      totalScoreRecords.appendChild(totalRow);
+
+      // 初始化總計表頭
+      totalPlayerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
+    }
+
     // 玩家人數選擇
     playerCountForm.addEventListener('submit', function(e) {
       e.preventDefault();
       const playerCount = parseInt(document.getElementById('player-count').value, 10);
-
+      if (playerCount < 3 || playerCount > 5) {
+        alert('請選擇3至5位玩家');
+        return;
+      }
       // 顯示玩家名稱輸入區域
       document.querySelector('.player-setup').style.display = 'none';
       document.querySelector('.player-names').style.display = 'block';
@@ -155,11 +209,11 @@
       for (let i = 0; i < playerCount; i++) {
         playerNameInputsDiv.innerHTML += `
           <label for="player${i + 1}">玩家 ${i + 1} 名字：</label>
-          <select id="player${i + 1}" required>
+          <select id="player${i + 1}" name="player${i + 1}" required>
             <option value="">-- 請選擇或輸入新玩家 --</option>
             ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
           </select>
-          <input type="text" placeholder="或輸入新玩家" />
+          <input type="text" placeholder="或輸入新玩家" oninput="this.previousElementSibling.value=''" />
         `;
       }
     });
@@ -177,7 +231,6 @@
         players.push(selectedPlayer || newPlayer);
       });
 
-      // 檢查是否有空名稱
       if (players.some(name => name === '')) {
         alert('請輸入所有玩家的名稱');
         return;
@@ -196,6 +249,10 @@
 
       // 初始化表頭
       playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
+
+      // 儲存玩家資料
+      localStorage.setItem('players', JSON.stringify(players));
+      localStorage.setItem('scores', JSON.stringify(scores));
     });
 
     // 記錄分數
@@ -218,34 +275,28 @@
       }
 
       const bonus = bonusInput.value.trim();
+
+      // 更新分數
       scores.push({ scores: currentScores, bonus });
 
       // 更新表格
       updateScoreTable();
+
+      // 儲存分數資料
+      localStorage.setItem('scores', JSON.stringify(scores));
+      localStorage.setItem('bonus', bonus);
+
+      // 清空輸入欄位
+      scoreForm.reset();
+      bonusInput.value = '';
     });
-
-    // 更新分數表
-    function updateScoreTable() {
-      scoreRecords.innerHTML = '';
-      scores.forEach(round => {
-        const row = document.createElement('tr');
-        row.innerHTML = round.scores.map(score => `<td>${score}</td>`).join('');
-        row.innerHTML += `<td class="bonus-column">${round.bonus}</td>`;
-        scoreRecords.appendChild(row);
-      });
-
-      // 計算總得分
-      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
-      totalScoreRecords.innerHTML = '';
-      const totalRow = document.createElement('tr');
-      totalRow.innerHTML = totalScores.map(score => `<td>${score}</td>`).join('');
-      totalScoreRecords.appendChild(totalRow);
-      totalPlayerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
-    }
 
     // 重新計分按鈕
     resetScoresButton.addEventListener('click', function() {
       if (confirm("確定要將本日輸贏歸零嗎？")) {
+        localStorage.removeItem('players');
+        localStorage.removeItem('scores');
+        localStorage.removeItem('bonus');
         players = [];
         scores = [];
         playerScoresDiv.innerHTML = '';
@@ -257,6 +308,6 @@
         document.querySelector('.score-table').style.display = 'none';
       }
     });
-  </script>
-</body>
-</html>
+
+    // 初始加載資料
+    loadD
