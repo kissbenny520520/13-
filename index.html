@@ -50,7 +50,7 @@
       text-align: center;
       color: red;
       font-weight: bold;
-      font-size: 24px; /* 調整字體大小 */
+      font-size: 24px;
     }
     .score-summary {
       color: green;
@@ -115,6 +115,7 @@
   <!-- 分數表 -->
   <section class="score-table" style="display: none;">
     <h2>每場詳細</h2>
+    <div id="player-scores-summary"></div>
     <table>
       <thead>
         <tr id="player-headers"></tr>
@@ -129,6 +130,7 @@
     const playerNamesForm = document.getElementById('player-names-form');
     const playerNameInputsDiv = document.getElementById('player-name-inputs');
     const playerScoresDiv = document.getElementById('player-scores');
+    const playerScoresSummary = document.getElementById('player-scores-summary');
     const playerHeaders = document.getElementById('player-headers');
     const scoreRecords = document.getElementById('score-records');
     const errorMessage = document.getElementById('error-message');
@@ -169,13 +171,11 @@
 
     // 顯示每位玩家的總結積分
     function displayPlayerScoresSummary() {
-      const summaryDiv = document.createElement('div');
-      summaryDiv.innerHTML = players.map(player => `
+      playerScoresSummary.innerHTML = players.map(player => `
         <div>
           <strong>${player}：</strong> <span class="score-summary">${calculateTotalScore(player)}分</span>
         </div>
       `).join('');
-      document.querySelector('.score-input').insertBefore(summaryDiv, playerScoresDiv);
     }
 
     // 計算每位玩家的總積分
@@ -256,72 +256,43 @@
         <label for="${player}">${player}：</label>
         <input type="number" id="${player}" name="${player}" required>
       `).join('');
-
-      // 初始化表頭
-      playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
-
-      // 儲存玩家資料
-      localStorage.setItem('players', JSON.stringify(players));
-      localStorage.setItem('scores', JSON.stringify(scores));
     });
 
-    // 記錄分數
-    const scoreForm = document.getElementById('score-form');
+    // 處理每場積分表格新增
     scoreForm.addEventListener('submit', function(e) {
       e.preventDefault();
-      const currentScores = players.map(player => {
-        const score = parseInt(document.getElementById(player).value, 10);
-        return isNaN(score) ? 0 : score;
+
+      const bonus = bonusInput.value;
+      const roundScores = players.map(player => {
+        const score = document.getElementById(player).value;
+        return parseInt(score) || 0;
       });
 
-      // 檢查分數加總是否為0
-      const totalScore = currentScores.reduce((sum, score) => sum + score, 0);
-      if (totalScore !== 0) {
-        errorMessage.style.display = 'block';
-        errorMessage.textContent = '此場比賽的總分數必須為0，請重新檢查分數。';
-        return;
-      } else {
-        errorMessage.style.display = 'none';
-      }
+      scores.push({ scores: roundScores, bonus: bonus });
 
-      const bonus = bonusInput.value.trim();
-
-      // 更新分數
-      scores.push({ scores: currentScores, bonus });
-
-      // 更新表格
-      updateScoreTable();
+      // 存儲到 localStorage
+      localStorage.setItem('scores', JSON.stringify(scores));
 
       // 顯示每位玩家的總結積分
       displayPlayerScoresSummary();
 
-      // 儲存分數資料
-      localStorage.setItem('scores', JSON.stringify(scores));
-      localStorage.setItem('bonus', bonus);
-
-      // 清空輸入欄位
-      scoreForm.reset();
-      bonusInput.value = '';
+      // 更新分數表
+      updateScoreTable();
     });
 
-    // 重新計分按鈕
+    // 重置所有分數
     resetScoresButton.addEventListener('click', function() {
-      if (confirm("確定要將本日輸贏歸零嗎？")) {
-        localStorage.removeItem('players');
-        localStorage.removeItem('scores');
-        localStorage.removeItem('bonus');
-        players = [];
-        scores = [];
-        playerScoresDiv.innerHTML = '';
-        scoreRecords.innerHTML = '';
-        document.querySelector('.player-setup').style.display = 'block';
-        document.querySelector('.player-names').style.display = 'none';
-        document.querySelector('.score-input').style.display = 'none';
-        document.querySelector('.score-table').style.display = 'none';
-      }
+      localStorage.removeItem('players');
+      localStorage.removeItem('scores');
+      players = [];
+      scores = [];
+
+      document.querySelector('.player-setup').style.display = 'block';
+      document.querySelector('.score-input').style.display = 'none';
+      document.querySelector('.score-table').style.display = 'none';
     });
 
-    // 初始加載資料
+    // 加載資料
     loadData();
   </script>
 </body>
