@@ -231,6 +231,7 @@
         players.push(selectedPlayer || newPlayer);
       });
 
+      // 檢查是否有空名稱
       if (players.some(name => name === '')) {
         alert('請輸入所有玩家的名稱');
         return;
