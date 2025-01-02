@@ -55,10 +55,12 @@
   </section>
 
   <script>
-    // 設定玩家數量並顯示玩家名稱頁面
+    // 監聽設定玩家數量並顯示玩家名稱頁面
     document.getElementById('player-setup-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const playerCount = parseInt(document.getElementById('player-count').value);
+      console.log("選擇的玩家數量:", playerCount);  // 日誌輸出
+
       if (playerCount < 3 || playerCount > 5) {
         alert('請選擇3至5位玩家');
         return;
@@ -76,13 +78,13 @@
       `).join('');
     });
 
-    // 提交玩家名稱並進入記分頁面
+    // 監聽提交玩家名稱並進入記分頁面
     document.getElementById('player-names-form').addEventListener('submit', function(e) {
       e.preventDefault();
-
-      // 獲取玩家名稱
       const players = [];
       const playerNameFields = document.getElementById('player-name-fields');
+
+      // 確保每個玩家名稱都被填寫
       for (let i = 0; i < playerNameFields.children.length; i++) {
         const playerName = document.getElementById(`player-${i}`).value.trim();
         if (!playerName) {
@@ -92,7 +94,7 @@
         players.push(playerName);
       }
 
-      console.log("玩家名稱:", players);
+      console.log("玩家名稱:", players);  // 日誌輸出
 
       // 顯示記分頁面
       document.getElementById('player-names').style.display = 'none';
