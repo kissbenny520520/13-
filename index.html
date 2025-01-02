@@ -52,6 +52,10 @@
       font-weight: bold;
       font-size: 24px; /* 調整字體大小 */
     }
+    .score-summary {
+      color: green;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -117,13 +121,6 @@
       </thead>
       <tbody id="score-records"></tbody>
     </table>
-    <h3 class="total-heading">總計</h3>
-    <table>
-      <thead>
-        <tr id="total-player-headers"></tr>
-      </thead>
-      <tbody id="total-score-records"></tbody>
-    </table>
     <button type="button" id="reset-scores" style="margin-top: 40px;">本日輸贏歸零</button>
   </section>
 
@@ -134,8 +131,6 @@
     const playerScoresDiv = document.getElementById('player-scores');
     const playerHeaders = document.getElementById('player-headers');
     const scoreRecords = document.getElementById('score-records');
-    const totalPlayerHeaders = document.getElementById('total-player-headers');
-    const totalScoreRecords = document.getElementById('total-score-records');
     const errorMessage = document.getElementById('error-message');
     const bonusInput = document.getElementById('bonus');
     const resetScoresButton = document.getElementById('reset-scores');
@@ -155,6 +150,9 @@
         document.querySelector('.score-input').style.display = 'block';
         document.querySelector('.score-table').style.display = 'block';
         
+        // 顯示每位玩家的總結積分
+        displayPlayerScoresSummary();
+
         // 初始化記分輸入表單
         playerScoresDiv.innerHTML = players.map(player => `
           <label for="${player}">${player}：</label>
@@ -167,6 +165,23 @@
         // 更新分數表
         updateScoreTable();
       }
+    }
+
+    // 顯示每位玩家的總結積分
+    function displayPlayerScoresSummary() {
+      const summaryDiv = document.createElement('div');
+      summaryDiv.innerHTML = players.map(player => `
+        <div>
+          <strong>${player}：</strong> <span class="score-summary">${calculateTotalScore(player)}分</span>
+        </div>
+      `).join('');
+      document.querySelector('.score-input').insertBefore(summaryDiv, playerScoresDiv);
+    }
+
+    // 計算每位玩家的總積分
+    function calculateTotalScore(player) {
+      const playerIndex = players.indexOf(player);
+      return scores.reduce((sum, round) => sum + round.scores[playerIndex], 0);
     }
 
     // 更新分數表
@@ -182,18 +197,6 @@
         row.innerHTML += `<td class="bonus-column">${round.bonus}</td>`;
         scoreRecords.appendChild(row);
       });
-
-      // 計算總得分
-      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
-
-      // 更新總計表格
-      totalScoreRecords.innerHTML = '';
-      const totalRow = document.createElement('tr');
-      totalRow.innerHTML = totalScores.map(score => `<td>${score}</td>`).join('');
-      totalScoreRecords.appendChild(totalRow);
-
-      // 初始化總計表頭
-      totalPlayerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
     }
 
     // 玩家人數選擇
@@ -245,6 +248,9 @@
       document.querySelector('.score-input').style.display = 'block';
       document.querySelector('.score-table').style.display = 'block';
 
+      // 顯示每位玩家的總結積分
+      displayPlayerScoresSummary();
+
       // 初始化記分輸入表單
       playerScoresDiv.innerHTML = players.map(player => `
         <label for="${player}">${player}：</label>
@@ -286,6 +292,9 @@
       // 更新表格
       updateScoreTable();
 
+      // 顯示每位玩家的總結積分
+      displayPlayerScoresSummary();
+
       // 儲存分數資料
       localStorage.setItem('scores', JSON.stringify(scores));
       localStorage.setItem('bonus', bonus);
@@ -305,7 +314,6 @@
         scores = [];
         playerScoresDiv.innerHTML = '';
         scoreRecords.innerHTML = '';
-        totalScoreRecords.innerHTML = '';
         document.querySelector('.player-setup').style.display = 'block';
         document.querySelector('.player-names').style.display = 'none';
         document.querySelector('.score-input').style.display = 'none';
