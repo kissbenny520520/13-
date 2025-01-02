@@ -3,107 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>大德13支大戰</title>
+  <title>測試 - 記分頁面切換</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    h1, h2 {
-      text-align: center;
     }
     .section {
-      margin: 20px auto;
-      max-width: 600px;
+      display: none;
+      margin: 20px;
     }
-    label, input, button {
+    .section.active {
       display: block;
-      margin: 10px 0;
     }
   </style>
 </head>
 <body>
-  <h1>大德13支大戰</h1>
+  <h1>測試 - 記分頁面切換</h1>
 
-  <!-- 選擇玩家數量 -->
-  <section class="section" id="player-setup">
+  <!-- 設定玩家數量 -->
+  <div id="step1" class="section active">
     <h2>選擇玩家數量</h2>
-    <form id="player-setup-form">
-      <label for="player-count">選擇玩家數量：</label>
-      <select id="player-count">
-        <option value="3">3人</option>
-        <option value="4">4人</option>
-        <option value="5">5人</option>
-      </select>
-      <button type="submit">開始遊戲</button>
-    </form>
-  </section>
+    <button id="startSetup">開始設定玩家</button>
+  </div>
 
-  <!-- 輸入玩家名稱 -->
-  <section class="section" id="player-names" style="display: none;">
+  <!-- 設定玩家名稱 -->
+  <div id="step2" class="section">
     <h2>輸入玩家名稱</h2>
-    <form id="player-names-form">
-      <div id="player-name-fields"></div>
-      <button type="submit">開始計分</button>
-    </form>
-  </section>
+    <button id="goToScoring">前往記分</button>
+  </div>
 
-  <!-- 記分區 -->
-  <section class="section" id="score-input" style="display: none;">
-    <h2>開始記分</h2>
-    <p>這是記分區</p>
-  </section>
+  <!-- 記分頁面 -->
+  <div id="step3" class="section">
+    <h2>記分頁面</h2>
+    <p>這是記分頁面</p>
+  </div>
 
   <script>
-    // 確保頁面加載後執行
-    window.addEventListener('load', function() {
-      console.log('頁面加載完成');
+    // 事件監聽
+    document.getElementById('startSetup').addEventListener('click', () => {
+      document.getElementById('step1').classList.remove('active');
+      document.getElementById('step2').classList.add('active');
+      console.log('已進入玩家名稱設定頁面');
     });
 
-    // 監聽設定玩家數量並顯示玩家名稱頁面
-    document.getElementById('player-setup-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const playerCount = parseInt(document.getElementById('player-count').value);
-      console.log("選擇的玩家數量:", playerCount);  // 日誌輸出
-
-      if (playerCount < 3 || playerCount > 5) {
-        alert('請選擇3至5位玩家');
-        return;
-      }
-
-      // 顯示玩家名稱輸入頁面
-      document.getElementById('player-setup').style.display = 'none';
-      document.getElementById('player-names').style.display = 'block';
-
-      // 動態生成玩家名稱輸入欄位
-      const playerNameFields = document.getElementById('player-name-fields');
-      playerNameFields.innerHTML = Array.from({ length: playerCount }, (_, i) => `
-        <label for="player-${i}">玩家 ${i + 1} 名稱：</label>
-        <input type="text" id="player-${i}" required>
-      `).join('');
-    });
-
-    // 監聽提交玩家名稱並進入記分頁面
-    document.getElementById('player-names-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const players = [];
-      const playerNameFields = document.getElementById('player-name-fields');
-
-      // 確保每個玩家名稱都被填寫
-      for (let i = 0; i < playerNameFields.children.length; i++) {
-        const playerName = document.getElementById(`player-${i}`).value.trim();
-        if (!playerName) {
-          alert("請填寫所有玩家名稱！");
-          return;
-        }
-        players.push(playerName);
-      }
-
-      console.log("玩家名稱:", players);  // 日誌輸出
-
-      // 顯示記分頁面
-      document.getElementById('player-names').style.display = 'none';
-      document.getElementById('score-input').style.display = 'block';
+    document.getElementById('goToScoring').addEventListener('click', () => {
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step3').classList.add('active');
+      console.log('已進入記分頁面');
     });
   </script>
 </body>
