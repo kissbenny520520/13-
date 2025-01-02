@@ -37,6 +37,11 @@
       font-size: 14px;
       text-align: center;
     }
+    /* 設置彩金欄位的顏色和字體 */
+    .bonus-column {
+      color: red;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -83,7 +88,7 @@
     <table>
       <thead>
         <tr id="player-headers"></tr>
-        <th>彩金</th>
+        <th class="bonus-column">彩金</th> <!-- Set bonus column header as red and bold -->
       </thead>
       <tbody id="score-records"></tbody>
     </table>
@@ -153,7 +158,6 @@
 
       // 初始化表頭
       playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
-      playerHeaders.innerHTML += `<th>彩金</th>`;  // Add the "彩金" column header
     });
 
     // 記錄分數
@@ -183,7 +187,7 @@
       // 更新表格
       const row = document.createElement('tr');
       row.innerHTML = currentScores.map(score => `<td>${score}</td>`).join('');
-      row.innerHTML += `<td>${bonus}</td>`;  // Add the bonus value to the table row
+      row.innerHTML += `<td class="bonus-column">${bonus}</td>`;  // Apply bonus-column class to bonus column
       scoreRecords.appendChild(row);
 
       // 計算總得分
