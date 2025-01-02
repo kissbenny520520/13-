@@ -91,6 +91,30 @@
     let players = [];
     let scores = [];
 
+    // 檢查是否有儲存過的玩家資料
+    if (sessionStorage.getItem('players') && sessionStorage.getItem('scores')) {
+      players = JSON.parse(sessionStorage.getItem('players'));
+      scores = JSON.parse(sessionStorage.getItem('scores'));
+
+      // 顯示計分頁面
+      document.querySelector('.player-setup').style.display = 'none';
+      document.querySelector('.player-names').style.display = 'none';
+      document.querySelector('.score-input').style.display = 'block';
+      document.querySelector('.score-table').style.display = 'block';
+
+      // 初始化記分輸入表單
+      playerScoresDiv.innerHTML = players.map(player => `
+        <label for="${player}">${player}：</label>
+        <input type="number" id="${player}" name="${player}" required>
+      `).join('');
+
+      // 初始化表頭
+      playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
+      
+      // 顯示分數記錄
+      updateScoreTable();
+    }
+
     // 設定玩家數量
     playerSetupForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -136,6 +160,10 @@
 
       // 初始化表頭
       playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
+
+      // 保存玩家資料
+      sessionStorage.setItem('players', JSON.stringify(players));
+      sessionStorage.setItem('scores', JSON.stringify(scores));
     });
 
     // 記錄分數
@@ -156,18 +184,24 @@
 
       scores.push(currentScores);
 
-      // 更新表格
-      const row = document.createElement('tr');
-      row.innerHTML = currentScores.map(score => `<td>${score}</td>`).join('');
-      scoreRecords.appendChild(row);
+      // 更新分數並儲存
+      sessionStorage.setItem('scores', JSON.stringify(scores));
 
-      // 計算總得分
-      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round[i], 0));
-      totalScoresList.innerHTML = players.map((player, i) => `<li>${player}: ${totalScores[i]}</li>`).join('');
+      // 更新表格
+      updateScoreTable();
 
       // 清空輸入欄位
       scoreForm.reset();
     });
+
+    // 更新分數表格
+    function updateScoreTable() {
+      const rows = scores.map(score => `<tr>${score.map(s => `<td>${s}</td>`).join('')}</tr>`).join('');
+      scoreRecords.innerHTML = rows;
+
+      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round[i], 0));
+      totalScoresList.innerHTML = players.map((player, i) => `<li>${player}: ${totalScores[i]}</li>`).join('');
+    }
   </script>
 </body>
 </html>
