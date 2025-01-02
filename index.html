@@ -119,7 +119,6 @@
     const playerScoresDiv = document.getElementById('player-scores');
     const playerHeaders = document.getElementById('player-headers');
     const scoreRecords = document.getElementById('score-records');
-    const totalScoresList = document.getElementById('total-scores');
     const totalPlayerHeaders = document.getElementById('total-player-headers');
     const totalScoreRecords = document.getElementById('total-score-records');
     const errorMessage = document.getElementById('error-message');
@@ -134,7 +133,6 @@
     function loadData() {
       players = JSON.parse(localStorage.getItem('players')) || [];
       scores = JSON.parse(localStorage.getItem('scores')) || [];
-      const bonus = localStorage.getItem('bonus') || '';
 
       if (players.length > 0) {
         document.querySelector('.player-setup').style.display = 'none';
@@ -168,7 +166,6 @@
 
       // 計算總得分
       const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
-      totalScoresList.innerHTML = players.map((player, i) => `<li>${player}: ${totalScores[i]}</li>`).join('');
 
       // 更新總計表格
       totalScoreRecords.innerHTML = '';
@@ -289,7 +286,6 @@
         scores = [];
         playerScoresDiv.innerHTML = '';
         scoreRecords.innerHTML = '';
-        totalScoresList.innerHTML = '';
         totalScoreRecords.innerHTML = '';
         document.querySelector('.player-setup').style.display = 'block';
         document.querySelector('.player-names').style.display = 'none';
