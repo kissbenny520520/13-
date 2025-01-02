@@ -55,6 +55,15 @@
     </form>
   </section>
 
+  <!-- 輸入玩家名稱 -->
+  <section class="player-names" style="display: none;">
+    <h2>輸入玩家名稱</h2>
+    <form id="player-names-form">
+      <div id="player-name-fields"></div>
+      <button type="submit">開始計分</button>
+    </form>
+  </section>
+
   <!-- 記分區 -->
   <section class="score-input" style="display: none;">
     <h2>輸入每場分數</h2>
@@ -83,8 +92,10 @@
 
   <script>
     const playerSetupForm = document.getElementById('player-setup-form');
+    const playerNamesForm = document.getElementById('player-names-form');
     const scoreForm = document.getElementById('score-form');
     const playerScoresDiv = document.getElementById('player-scores');
+    const playerNameFields = document.getElementById('player-name-fields');
     const playerHeaders = document.getElementById('player-headers');
     const scoreRecords = document.getElementById('score-records');
     const totalScoresList = document.getElementById('total-scores');
@@ -94,7 +105,7 @@
     let players = [];
     let scores = [];
 
-    // 設定玩家
+    // 設定玩家數量
     playerSetupForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const playerCount = parseInt(playerCountSelect.value);
@@ -103,10 +114,26 @@
         return;
       }
 
-      players = Array.from({ length: playerCount }, (_, i) => `玩家${String.fromCharCode(65 + i)}`);
+      // 顯示玩家名稱輸入區
+      document.querySelector('.player-setup').style.display = 'none';
+      document.querySelector('.player-names').style.display = 'block';
+
+      // 動態生成玩家名稱輸入欄位
+      playerNameFields.innerHTML = Array.from({ length: playerCount }, (_, i) => `
+        <label for="player-${i}">玩家 ${i + 1} 名稱：</label>
+        <input type="text" id="player-${i}" required>
+      `).join('');
+    });
+
+    // 提交玩家名稱並開始計分
+    playerNamesForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // 獲取玩家名稱
+      players = Array.from({ length: playerNameFields.children.length }, (_, i) => document.getElementById(`player-${i}`).value.trim());
 
       // 顯示記分區
-      document.querySelector('.player-setup').style.display = 'none';
+      document.querySelector('.player-names').style.display = 'none';
       document.querySelector('.score-input').style.display = 'block';
       document.querySelector('.score-table').style.display = 'block';
       resetScoresButton.style.display = 'inline-block';
