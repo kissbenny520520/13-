@@ -110,7 +110,6 @@
 
   <!-- 分數表 -->
   <section class="score-table" style="display: none;">
-    <!-- 總計表格 -->
     <h3 class="total-heading">總計</h3>
     <table>
       <thead>
@@ -119,7 +118,6 @@
       <tbody id="total-score-records"></tbody>
     </table>
 
-    <!-- 每場詳細 -->
     <h2>每場詳細</h2>
     <table>
       <thead>
@@ -151,44 +149,56 @@
     let players = [];
     let scores = [];
 
-    // 更新分數表
-    function updateScoreTable() {
-      scoreRecords.innerHTML = '';
+    // 玩家人數選擇
+    playerCountForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const playerCount = parseInt(document.getElementById('player-count').value, 10);
+      if (playerCount < 3 || playerCount > 5) {
+        alert('請選擇3至5位玩家');
+        return;
+      }
+      // 顯示玩家名稱輸入區域
+      document.querySelector('.player-setup').style.display = 'none';
+      document.querySelector('.player-names').style.display = 'block';
 
-      // 反向排序分數資料，讓最新的記錄在最上面
-      const reversedScores = [...scores].reverse();
+      // 根據選擇的玩家數量顯示對應的輸入框
+      playerNameInputsDiv.innerHTML = '';
+      for (let i = 0; i < playerCount; i++) {
+        playerNameInputsDiv.innerHTML += `
+          <label for="player${i + 1}">玩家 ${i + 1} 名字：</label>
+          <select id="player${i + 1}" name="player${i + 1}" required>
+            <option value="">-- 請選擇或輸入新玩家 --</option>
+            ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
+          </select>
+          <input type="text" placeholder="或輸入新玩家" oninput="this.previousElementSibling.value=''">
+        `;
+      }
+    });
 
-      reversedScores.forEach((round, index) => {
-        const row = document.createElement('tr');
-        
-        // 添加第幾次欄位
-        const roundNumber = reversedScores.length - index; // 倒數第幾次
-        row.innerHTML = `<td>${roundNumber}</td>`;
+    // 設定玩家名稱
+    playerNamesForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      players = [];
+      const selects = document.querySelectorAll('.player-names select');
+      const inputs = document.querySelectorAll('.player-names input[type="text"]');
 
-        // 添加分數欄位
-        row.innerHTML += round.scores.map(score => `<td>${score}</td>`).join('');
-
-        // 添加彩金欄位
-        row.innerHTML += `<td class="bonus-column">${round.bonus}</td>`;
-        scoreRecords.appendChild(row);
+      selects.forEach((select, index) => {
+        const selectedPlayer = select.value.trim();
+        const newPlayer = inputs[index].value.trim();
+        players.push(selectedPlayer || newPlayer);
       });
 
-      // 計算總得分
-      const totalScores = players.map((_, i) => 
-        scores.reduce((sum, round) => sum + round.scores[i], 0)
-      );
+      if (players.some(name => name === '')) {
+        alert('請輸入所有玩家的名稱');
+        return;
+      }
 
-      // 更新總計表格
-      totalScoreRecords.innerHTML = '';
-      const totalRow = document.createElement('tr');
-      totalRow.innerHTML = totalScores.map(score => `<td>${score}</td>`).join('');
-      totalScoreRecords.appendChild(totalRow);
-
-      // 初始化總計表頭
-      totalPlayerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
-    }
-
-    // 其他邏輯未變動...
+      // 儲存資料並跳轉到記分畫面
+      localStorage.setItem('players', JSON.stringify(players));
+      document.querySelector('.player-names').style.display = 'none';
+      document.querySelector('.score-input').style.display = 'block';
+      document.querySelector('.score-table').style.display = 'block';
+    });
   </script>
 </body>
 </html>
