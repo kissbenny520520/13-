@@ -52,6 +52,16 @@
       font-weight: bold;
       font-size: 24px;
     }
+    .player-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .player-row label,
+    .player-row input,
+    .player-row span {
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -153,9 +163,11 @@
         playerScoresDiv.innerHTML = players.map(player => {
           const totalScore = scores.reduce((sum, round) => sum + (round.scores[players.indexOf(player)] || 0), 0);
           return `
-            <label for="${player}">${player}：</label>
-            <input type="number" id="${player}" name="${player}" required>
-            <span style="color: green; font-weight: bold;" id="${player}-total">(${totalScore})</span>
+            <div class="player-row">
+              <label for="${player}">${player}：</label>
+              <input type="number" id="${player}" name="${player}" required>
+              <span id="${player}-total" style="color: green; font-weight: bold;">(${totalScore})</span>
+            </div>
           `;
         }).join('');
 
@@ -231,9 +243,11 @@
       playerScoresDiv.innerHTML = players.map(player => {
         const totalScore = scores.reduce((sum, round) => sum + (round.scores[players.indexOf(player)] || 0), 0);
         return `
-          <label for="${player}">${player}：</label>
-          <input type="number" id="${player}" name="${player}" required>
-          <span style="color: green; font-weight: bold;" id="${player}-total">(${totalScore})</span>
+          <div class="player-row">
+            <label for="${player}">${player}：</label>
+            <input type="number" id="${player}" name="${player}" required>
+            <span id="${player}-total" style="color: green; font-weight: bold;">(${totalScore})</span>
+          </div>
         `;
       }).join('');
 
@@ -246,17 +260,6 @@
     const scoreForm = document.getElementById('score-form');
     scoreForm.addEventListener('submit', function(e) {
       e.preventDefault();
-
-      // 檢查是否選擇了彩金
-      const bonus = bonusInput.value.trim();
-      if (!bonus) {
-        errorMessage.style.display = 'block';
-        errorMessage.textContent = '請選擇彩金!';
-        return;
-      } else {
-        errorMessage.style.display = 'none';
-      }
-
       const currentScores = players.map(player => {
         const score = parseInt(document.getElementById(player).value, 10);
         return isNaN(score) ? 0 : score;
@@ -271,6 +274,7 @@
         errorMessage.style.display = 'none';
       }
 
+      const bonus = bonusInput.value.trim();
       scores.push({ scores: currentScores, bonus });
 
       updateScoreTable();
