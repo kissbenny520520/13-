@@ -50,7 +50,7 @@
       text-align: center;
       color: red;
       font-weight: bold;
-      font-size: 24px;
+      font-size: 24px; /* 調整字體大小 */
     }
   </style>
 </head>
@@ -60,7 +60,7 @@
 
   <!-- 玩家人數選擇 -->
   <section class="player-setup">
-    <h2>玩家數量</h2>
+    <h2> 玩家數量 </h2>
     <form id="player-count-form">
       <label for="player-count">選擇人數：</label>
       <select id="player-count" required>
@@ -120,11 +120,7 @@
     <h2>每場詳細</h2>
     <table>
       <thead>
-        <tr>
-          <th>場次</th>
-          <th id="player-headers"></th>
-          <th class="bonus-column">彩金</th>
-        </tr>
+        <tr id="player-headers"></tr>
       </thead>
       <tbody id="score-records"></tbody>
     </table>
@@ -144,8 +140,57 @@
     const bonusInput = document.getElementById('bonus');
     const resetScoresButton = document.getElementById('reset-scores');
 
+    const commonPlayers = ["佳穎", "品安", "季村", "小學", "治杰", "小燁"];
     let players = [];
     let scores = [];
+
+    // 從 localStorage 加載資料
+    function loadData() {
+      players = JSON.parse(localStorage.getItem('players')) || [];
+      scores = JSON.parse(localStorage.getItem('scores')) || [];
+
+      if (players.length > 0) {
+        document.querySelector('.player-setup').style.display = 'none';
+        document.querySelector('.player-names').style.display = 'none';
+        document.querySelector('.score-input').style.display = 'block';
+        document.querySelector('.score-table').style.display = 'block';
+        
+        // 初始化記分輸入表單
+        playerScoresDiv.innerHTML = players.map(player => `
+          <label for="${player}">${player}：</label>
+          <input type="number" id="${player}" name="${player}" required>
+        `).join('');
+
+        // 初始化表頭
+        playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
+        
+        // 更新分數表
+        updateScoreTable();
+      }
+    }
+
+    // 更新分數表
+    function updateScoreTable() {
+      scoreRecords.innerHTML = '';
+      scores.forEach(round => {
+        const row = document.createElement('tr');
+        row.innerHTML = round.scores.map(score => `<td>${score}</td>`).join('');
+        row.innerHTML += `<td class="bonus-column">${round.bonus}</td>`;
+        scoreRecords.appendChild(row);
+      });
+
+      // 計算總得分
+      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
+
+      // 更新總計表格
+      totalScoreRecords.innerHTML = '';
+      const totalRow = document.createElement('tr');
+      totalRow.innerHTML = totalScores.map(score => `<td>${score}</td>`).join('');
+      totalScoreRecords.appendChild(totalRow);
+
+      // 初始化總計表頭
+      totalPlayerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
+    }
 
     // 玩家人數選擇
     playerCountForm.addEventListener('submit', function(e) {
@@ -155,7 +200,6 @@
         alert('請選擇3至5位玩家');
         return;
       }
-
       // 顯示玩家名稱輸入區域
       document.querySelector('.player-setup').style.display = 'none';
       document.querySelector('.player-names').style.display = 'block';
@@ -165,7 +209,11 @@
       for (let i = 0; i < playerCount; i++) {
         playerNameInputsDiv.innerHTML += `
           <label for="player${i + 1}">玩家 ${i + 1} 名字：</label>
-          <input type="text" id="player${i + 1}" name="player${i + 1}" required>
+          <select id="player${i + 1}" name="player${i + 1}" required>
+            <option value="">-- 請選擇或輸入新玩家 --</option>
+            ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
+          </select>
+          <input type="text" placeholder="或輸入新玩家" oninput="this.previousElementSibling.value=''" />
         `;
       }
     });
@@ -174,13 +222,24 @@
     playerNamesForm.addEventListener('submit', function(e) {
       e.preventDefault();
       players = [];
+      const selects = document.querySelectorAll('.player-names select');
       const inputs = document.querySelectorAll('.player-names input[type="text"]');
-      inputs.forEach(input => players.push(input.value.trim()));
+      
+      selects.forEach((select, index) => {
+        const selectedPlayer = select.value.trim();
+        const newPlayer = inputs[index].value.trim();
+        players.push(selectedPlayer || newPlayer);
+      });
 
       if (players.some(name => name === '')) {
         alert('請輸入所有玩家的名稱');
         return;
       }
+
+      // 顯示記分區並隱藏玩家名稱區域
+      document.querySelector('.player-names').style.display = 'none';
+      document.querySelector('.score-input').style.display = 'block';
+      document.querySelector('.score-table').style.display = 'block';
 
       // 初始化記分輸入表單
       playerScoresDiv.innerHTML = players.map(player => `
@@ -189,10 +248,11 @@
       `).join('');
 
       // 初始化表頭
-      playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
-      document.querySelector('.player-names').style.display = 'none';
-      document.querySelector('.score-input').style.display = 'block';
-      document.querySelector('.score-table').style.display = 'block';
+      playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
+
+      // 儲存玩家資料
+      localStorage.setItem('players', JSON.stringify(players));
+      localStorage.setItem('scores', JSON.stringify(scores));
     });
 
     // 記錄分數
@@ -215,38 +275,42 @@
       }
 
       const bonus = bonusInput.value.trim();
+
+      // 更新分數
       scores.push({ scores: currentScores, bonus });
 
       // 更新表格
       updateScoreTable();
+
+      // 儲存分數資料
+      localStorage.setItem('scores', JSON.stringify(scores));
+      localStorage.setItem('bonus', bonus);
 
       // 清空輸入欄位
       scoreForm.reset();
       bonusInput.value = '';
     });
 
-    // 更新分數表
-    function updateScoreTable() {
-      scoreRecords.innerHTML = '';
-      scores.forEach((round, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${index + 1}</td>` + round.scores.map(score => `<td>${score}</td>`).join('') + `<td>${round.bonus}</td>`;
-        scoreRecords.appendChild(row);
-      });
-
-      // 計算總分
-      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
-      totalScoreRecords.innerHTML = `<tr>${totalScores.map(score => `<td>${score}</td>`).join('')}</tr>`;
-    }
-
-    // 重置分數
+    // 重新計分按鈕
     resetScoresButton.addEventListener('click', function() {
       if (confirm("確定要將本日輸贏歸零嗎？")) {
+        localStorage.removeItem('players');
+        localStorage.removeItem('scores');
+        localStorage.removeItem('bonus');
         players = [];
         scores = [];
-        location.reload();
+        playerScoresDiv.innerHTML = '';
+        scoreRecords.innerHTML = '';
+        totalScoreRecords.innerHTML = '';
+        document.querySelector('.player-setup').style.display = 'block';
+        document.querySelector('.player-names').style.display = 'none';
+        document.querySelector('.score-input').style.display = 'none';
+        document.querySelector('.score-table').style.display = 'none';
       }
     });
+
+    // 初始加載資料
+    loadData();
   </script>
 </body>
 </html>
