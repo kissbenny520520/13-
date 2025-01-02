@@ -193,6 +193,8 @@
       totalRecords.innerHTML = '';
       const totalRow = document.createElement('tr');
       totalRow.innerHTML = `<td>合計</td>` + totalScores.map(score => `<td>${score}</td>`).join('');
+      totalRow.style.fontWeight = 'bold';  // 設定粗體
+      totalRow.style.color = 'green';      // 設定綠色
       totalRecords.appendChild(totalRow);
     }
 
