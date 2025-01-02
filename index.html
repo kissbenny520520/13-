@@ -114,8 +114,6 @@
         return;
       }
 
-      console.log('玩家數量選擇:', playerCount); // 用於排查問題
-
       // 顯示玩家名稱輸入區
       document.querySelector('.player-setup').style.display = 'none';
       document.querySelector('.player-names').style.display = 'block';
@@ -138,8 +136,6 @@
         alert("請填寫所有玩家名稱！");
         return;
       }
-
-      console.log('玩家名稱:', players); // 用於排查問題
 
       // 顯示記分區
       document.querySelector('.player-names').style.display = 'none';
@@ -197,7 +193,6 @@
 
     // 更新分數表
     function updateScoreTable() {
-      console.log('更新分數表', scores); // 用於排查問題
       // 更新比賽記錄
       scoreRecords.innerHTML = scores.map(({ scores, remarks }) => {
         return `<tr>
