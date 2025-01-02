@@ -3,14 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>大德13支大戰</title>
+  <title>大德機車行</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: "標楷體", serif;
       margin: 20px;
     }
     h1, h2 {
       text-align: center;
+      color: red;
+      font-weight: bold;
+    }
+    h1 {
+      margin: 0;
     }
     .player-setup, .player-names, .score-input, .score-table {
       margin: 20px auto;
@@ -44,7 +49,8 @@
   </style>
 </head>
 <body>
-  <h1>大德13支大戰</h1>
+  <h1>大德機車行</h1>
+  <h2>13隻大戰</h2>
 
   <!-- 玩家人數選擇 -->
   <section class="player-setup">
@@ -65,34 +71,34 @@
     <h2>輸入玩家名稱</h2>
     <form id="player-names-form">
       <div id="player-name-inputs"></div>
-      <button type="submit">開始記分</button>
+      <button type="submit">賴調燦!!!</button>
     </form>
   </section>
 
   <!-- 記分區 -->
   <section class="score-input" style="display: none;">
-    <h2>輸入每場分數</h2>
+    <h2>輸入每場輸贏</h2>
     <form id="score-form">
       <div id="player-scores"></div>
       <label for="bonus">彩金：</label>
       <input type="text" id="bonus" name="bonus" placeholder="輸入彩金備註">
-      <button type="submit">新增比賽結果</button>
-      <button type="button" id="reset-scores">重新計分</button>
+      <button type="submit">新增此場輸贏</button>
     </form>
     <div id="error-message" class="error" style="display: none;"></div>
   </section>
 
   <!-- 分數表 -->
   <section class="score-table" style="display: none;">
-    <h2>分數表</h2>
+    <h2>統計</h2>
     <table>
       <thead>
         <tr id="player-headers"></tr>
       </thead>
       <tbody id="score-records"></tbody>
     </table>
-    <h3>總得分</h3>
+    <h3>總計</h3>
     <ul id="total-scores"></ul>
+    <button type="button" id="reset-scores" style="margin-top: 40px;">本日輸贏歸零</button>
   </section>
 
   <script>
@@ -244,18 +250,20 @@
 
     // 重新計分按鈕
     resetScoresButton.addEventListener('click', function() {
-      localStorage.removeItem('players');
-      localStorage.removeItem('scores');
-      localStorage.removeItem('bonus');
-      players = [];
-      scores = [];
-      playerScoresDiv.innerHTML = '';
-      scoreRecords.innerHTML = '';
-      totalScoresList.innerHTML = '';
-      document.querySelector('.player-setup').style.display = 'block';
-      document.querySelector('.player-names').style.display = 'none';
-      document.querySelector('.score-input').style.display = 'none';
-      document.querySelector('.score-table').style.display = 'none';
+      if (confirm("確定要將本日輸贏歸零嗎？")) {
+        localStorage.removeItem('players');
+        localStorage.removeItem('scores');
+        localStorage.removeItem('bonus');
+        players = [];
+        scores = [];
+        playerScoresDiv.innerHTML = '';
+        scoreRecords.innerHTML = '';
+        totalScoresList.innerHTML = '';
+        document.querySelector('.player-setup').style.display = 'block';
+        document.querySelector('.player-names').style.display = 'none';
+        document.querySelector('.score-input').style.display = 'none';
+        document.querySelector('.score-table').style.display = 'none';
+      }
     });
 
     // 加載資料
