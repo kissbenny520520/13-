@@ -60,15 +60,15 @@
 
   <!-- 玩家人數選擇 -->
   <section class="player-setup">
-    <h2> 玩家數量 </h2>
+    <h2>選擇玩家人數</h2>
     <form id="player-count-form">
-      <label for="player-count">選擇人數：</label>
+      <label for="player-count">選擇玩家數量（3人、4人或5人）：</label>
       <select id="player-count" required>
         <option value="3">3人</option>
         <option value="4">4人</option>
         <option value="5">5人</option>
       </select>
-      <button type="submit">開始輸贏</button>
+      <button type="submit">開始遊戲</button>
     </form>
   </section>
 
@@ -87,22 +87,7 @@
     <form id="score-form">
       <div id="player-scores"></div>
       <label for="bonus">彩金：</label>
-      <select id="bonus" name="bonus">
-        <option value="">-- 請選擇彩金 --</option>
-        <option value="A">A</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-        <option value="8">8</option>
-        <option value="9">9</option>
-        <option value="10">10</option>
-        <option value="J">J</option>
-        <option value="Q">Q</option>
-        <option value="K">K</option>
-      </select>
+      <input type="text" id="bonus" name="bonus" placeholder="輸入彩金備註">
       <button type="submit">新增此場輸贏</button>
     </form>
     <div id="error-message" class="error" style="display: none;"></div>
@@ -110,7 +95,7 @@
 
   <!-- 分數表 -->
   <section class="score-table" style="display: none;">
-    <h2>每場詳細</h2>
+    <h2>統計</h2>
     <table>
       <thead>
         <tr id="player-headers"></tr>
@@ -310,4 +295,7 @@
     });
 
     // 初始加載資料
-    loadD
+    loadData();
+  </script>
+</body>
+</html>
