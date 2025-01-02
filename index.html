@@ -62,6 +62,9 @@
     .player-row span {
       margin-right: 10px;
     }
+    .score-input input {
+      width: 50%; /* 調整積分輸入欄位的寬度 */
+    }
   </style>
 </head>
 <body>
@@ -94,7 +97,7 @@
     <form id="score-form">
       <div id="player-scores"></div>
       <label for="bonus">彩金：</label>
-      <select id="bonus" name="bonus">
+      <select id="bonus" name="bonus" required>
         <option value="">-- 請選擇彩金 --</option>
         <option value="A">A</option>
         <option value="2">2</option>
@@ -260,6 +263,13 @@
     const scoreForm = document.getElementById('score-form');
     scoreForm.addEventListener('submit', function(e) {
       e.preventDefault();
+      
+      if (!bonusInput.value) {
+        errorMessage.style.display = 'block';
+        errorMessage.textContent = '請選擇一個彩金';
+        return;
+      }
+
       const currentScores = players.map(player => {
         const score = parseInt(document.getElementById(player).value, 10);
         return isNaN(score) ? 0 : score;
