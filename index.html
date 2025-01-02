@@ -48,22 +48,10 @@
     </form>
   </section>
 
-  <!-- 記分區 -->
-  <section class="section" id="score-input" style="display: none;">
-    <h2>輸入每場分數</h2>
-    <form id="score-form">
-      <div id="player-scores"></div>
-      <button type="submit">新增比賽結果</button>
-    </form>
-  </section>
-
   <script>
     const playerSetupForm = document.getElementById('player-setup-form');
     const playerNamesForm = document.getElementById('player-names-form');
-    const scoreForm = document.getElementById('score-form');
     const playerNameFields = document.getElementById('player-name-fields');
-    const playerScoresDiv = document.getElementById('player-scores');
-    let players = [];
 
     // 設定玩家數量
     playerSetupForm.addEventListener('submit', function (e) {
@@ -89,37 +77,16 @@
     // 提交玩家名稱並開始計分
     playerNamesForm.addEventListener('submit', function (e) {
       e.preventDefault();
-
       // 獲取玩家名稱
-      players = Array.from({ length: playerNameFields.children.length }, (_, i) => document.getElementById(`player-${i}`).value.trim());
+      const players = Array.from({ length: playerNameFields.children.length }, (_, i) => document.getElementById(`player-${i}`).value.trim());
 
       if (players.some(player => player === "")) {
         alert("請填寫所有玩家名稱！");
         return;
       }
 
-      // 顯示計分頁面
-      document.getElementById('player-names').style.display = 'none';
-      document.getElementById('score-input').style.display = 'block';
-
-      // 初始化記分輸入表單
-      playerScoresDiv.innerHTML = players.map(player => `
-        <label for="${player}">${player}：</label>
-        <input type="number" id="${player}" name="${player}" required>
-      `).join('');
-    });
-
-    // 記錄分數
-    scoreForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const currentScores = players.map(player => {
-        const score = parseInt(document.getElementById(player).value, 10);
-        return isNaN(score) ? 0 : score;
-      });
-
-      console.log('本場分數:', currentScores);
-      // 清空輸入欄位
-      scoreForm.reset();
+      // 顯示玩家名稱後續操作，或者開始計分
+      console.log("玩家名稱:", players);
     });
   </script>
 </body>
