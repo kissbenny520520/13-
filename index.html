@@ -172,7 +172,9 @@
     // 更新分數表
     function updateScoreTable() {
       scoreRecords.innerHTML = '';
-      scores.forEach(round => {
+      
+      // 反轉分數順序，讓最後一場顯示在最上面
+      scores.slice().reverse().forEach(round => {
         const row = document.createElement('tr');
         row.innerHTML = round.scores.map(score => `<td>${score}</td>`).join('');
         row.innerHTML += `<td class="bonus-column">${round.bonus}</td>`;
