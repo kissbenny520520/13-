@@ -12,7 +12,7 @@
     h1, h2 {
       text-align: center;
     }
-    .player-setup, .player-names, .score-input, .score-table {
+    .section {
       margin: 20px auto;
       max-width: 600px;
     }
@@ -34,8 +34,8 @@
 <body>
   <h1>大德13支大戰</h1>
 
-  <!-- 玩家設定 -->
-  <section class="player-setup">
+  <!-- 選擇玩家數量 -->
+  <section class="section" id="player-setup">
     <h2>選擇玩家數量</h2>
     <form id="player-setup-form">
       <label for="player-count">選擇玩家數量：</label>
@@ -49,7 +49,7 @@
   </section>
 
   <!-- 輸入玩家名稱 -->
-  <section class="player-names" style="display: none;">
+  <section class="section" id="player-names" style="display: none;">
     <h2>輸入玩家名稱</h2>
     <form id="player-names-form">
       <div id="player-name-fields"></div>
@@ -58,7 +58,7 @@
   </section>
 
   <!-- 記分區 -->
-  <section class="score-input" style="display: none;">
+  <section class="section" id="score-input" style="display: none;">
     <h2>輸入每場分數</h2>
     <form id="score-form">
       <div id="player-scores"></div>
@@ -67,7 +67,7 @@
   </section>
 
   <!-- 分數表 -->
-  <section class="score-table" style="display: none;">
+  <section class="section" id="score-table" style="display: none;">
     <h2>分數表</h2>
     <table>
       <thead>
@@ -102,8 +102,8 @@
       }
 
       // 顯示玩家名稱輸入頁面
-      document.querySelector('.player-setup').style.display = 'none';
-      document.querySelector('.player-names').style.display = 'block';
+      document.getElementById('player-setup').style.display = 'none';
+      document.getElementById('player-names').style.display = 'block';
 
       // 動態生成玩家名稱輸入欄位
       playerNameFields.innerHTML = Array.from({ length: playerCount }, (_, i) => `
@@ -125,9 +125,9 @@
       }
 
       // 顯示計分頁面
-      document.querySelector('.player-names').style.display = 'none';
-      document.querySelector('.score-input').style.display = 'block';
-      document.querySelector('.score-table').style.display = 'block';
+      document.getElementById('player-names').style.display = 'none';
+      document.getElementById('score-input').style.display = 'block';
+      document.getElementById('score-table').style.display = 'block';
 
       // 初始化記分輸入表單
       playerScoresDiv.innerHTML = players.map(player => `
