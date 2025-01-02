@@ -55,6 +55,11 @@
   </section>
 
   <script>
+    // 確保頁面加載後執行
+    window.addEventListener('load', function() {
+      console.log('頁面加載完成');
+    });
+
     // 監聽設定玩家數量並顯示玩家名稱頁面
     document.getElementById('player-setup-form').addEventListener('submit', function(e) {
       e.preventDefault();
