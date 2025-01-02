@@ -12,7 +12,7 @@
     h1, h2 {
       text-align: center;
     }
-    .player-setup, .score-input, .score-table {
+    .player-setup, .player-names, .score-input, .score-table {
       margin: 20px auto;
       max-width: 600px;
     }
@@ -147,7 +147,7 @@
       // 初始化表頭
       playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
       document.getElementById('remarks-header').style.display = 'table-row';
-      
+
       // 從 localStorage 讀取上次的得分
       const savedScores = localStorage.getItem('scores');
       if (savedScores) {
