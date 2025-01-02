@@ -47,7 +47,7 @@
       text-align: center;
       color: red;
       font-weight: bold;
-      font-size: 24px; /* 調整字體大小 */
+      font-size: 24px;
     }
   </style>
 </head>
@@ -137,7 +137,6 @@
     const bonusInput = document.getElementById('bonus');
     const resetScoresButton = document.getElementById('reset-scores');
 
-    const commonPlayers = ["佳穎", "品安", "季村", "小學", "治杰", "小燁"];
     let players = [];
     let scores = [];
 
@@ -145,10 +144,7 @@
     playerCountForm.addEventListener('submit', function(e) {
       e.preventDefault();
       const playerCount = parseInt(document.getElementById('player-count').value, 10);
-      if (playerCount < 3 || playerCount > 5) {
-        alert('請選擇3至5位玩家');
-        return;
-      }
+
       // 顯示玩家名稱輸入區域
       document.querySelector('.player-setup').style.display = 'none';
       document.querySelector('.player-names').style.display = 'block';
@@ -158,11 +154,7 @@
       for (let i = 0; i < playerCount; i++) {
         playerNameInputsDiv.innerHTML += `
           <label for="player${i + 1}">玩家 ${i + 1} 名字：</label>
-          <select id="player${i + 1}" name="player${i + 1}" required>
-            <option value="">-- 請選擇或輸入新玩家 --</option>
-            ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
-          </select>
-          <input type="text" placeholder="或輸入新玩家" />
+          <input type="text" placeholder="或輸入新玩家" required />
         `;
       }
     });
@@ -171,17 +163,17 @@
     playerNamesForm.addEventListener('submit', function(e) {
       e.preventDefault();
       players = [];
-      const selects = document.querySelectorAll('.player-names select');
       const inputs = document.querySelectorAll('.player-names input[type="text"]');
-      
-      selects.forEach((select, index) => {
-        const selectedPlayer = select.value.trim();
-        const newPlayer = inputs[index].value.trim();
-        players.push(selectedPlayer || newPlayer);
+
+      inputs.forEach(input => {
+        const playerName = input.value.trim();
+        if (playerName) {
+          players.push(playerName);
+        }
       });
 
       // 檢查是否有空名稱
-      if (players.some(name => name === '')) {
+      if (players.length === 0) {
         alert('請輸入所有玩家的名稱');
         return;
       }
@@ -249,8 +241,6 @@
     // 重新計分按鈕
     resetScoresButton.addEventListener('click', function() {
       if (confirm("確定要將本日輸贏歸零嗎？")) {
-        localStorage.removeItem('players');
-        localStorage.removeItem('scores');
         players = [];
         scores = [];
         playerScoresDiv.innerHTML = '';
@@ -262,9 +252,6 @@
         document.querySelector('.score-table').style.display = 'none';
       }
     });
-
-    // 載入資料
-    window.onload = loadData;
   </script>
 </body>
 </html>
