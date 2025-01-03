@@ -215,9 +215,9 @@
           <select id="player${i + 1}" name="player${i + 1}" required>
             <option value="">-- 請選擇或輸入新玩家 --</option>
             ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
-            <option value="new-player">加入新玩家</option>
+            <option value="new">加入新玩家</option>
           </select>
-          <input type="text" placeholder="或輸入新玩家" style="display: none;" />
+          <input type="text" placeholder="或輸入新玩家" style="display:none" id="new-player${i + 1}" />
         `;
       }
     });
@@ -231,7 +231,11 @@
       selects.forEach((select, index) => {
         const selectedPlayer = select.value.trim();
         const newPlayer = inputs[index].value.trim();
-        players.push(selectedPlayer === 'new-player' && newPlayer ? newPlayer : selectedPlayer);
+        if (selectedPlayer === 'new' && newPlayer !== '') {
+          players.push(newPlayer);
+        } else {
+          players.push(selectedPlayer);
+        }
       });
 
       if (players.some(name => name === '')) {
@@ -258,6 +262,17 @@
 
       localStorage.setItem('players', JSON.stringify(players));
       localStorage.setItem('scores', JSON.stringify(scores));
+    });
+
+    // 當選擇加入新玩家時顯示輸入框
+    document.addEventListener('change', function(e) {
+      if (e.target.tagName === 'SELECT' && e.target.value === 'new') {
+        const input = e.target.nextElementSibling;
+        input.style.display = 'block';
+      } else if (e.target.tagName === 'SELECT') {
+        const input = e.target.nextElementSibling;
+        input.style.display = 'none';
+      }
     });
 
     const scoreForm = document.getElementById('score-form');
