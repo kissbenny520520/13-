@@ -63,11 +63,11 @@
       margin-right: 10px;
     }
     .score-input input {
-      width: 5ch; /* 使每個輸入框的寬度適應五個字 */
+      width: 5ch;
     }
     .total-records tr {
       font-weight: bold;
-      color: green; /* 使總計行的字體顯示為粗體綠色 */
+      color: green;
     }
   </style>
 </head>
@@ -75,7 +75,6 @@
   <h1>大德機車行</h1>
   <h2>13隻大戰</h2>
 
-  <!-- 第一頁：選擇人數 -->
   <section class="player-setup">
     <h2> 玩家數量 </h2>
     <form id="player-count-form">
@@ -89,7 +88,6 @@
     </form>
   </section>
 
-  <!-- 第二頁：輸入玩家名稱 -->
   <section class="player-names" style="display: none;">
     <h2>輸入玩家名稱</h2>
     <form id="player-names-form">
@@ -98,7 +96,6 @@
     </form>
   </section>
 
-  <!-- 第三頁：輸入每場輸贏 -->
   <section class="score-input" style="display: none;">
     <h2>輸入每場輸贏</h2>
     <form id="score-form">
@@ -120,12 +117,11 @@
         <option value="Q">Q</option>
         <option value="K">K</option>
       </select>
-      <button type="submit">新增此場輸贏</button>
+      <button type="submit" id="submit-score" style="display:none;">新增此場輸贏</button>
     </form>
     <div id="error-message" class="error" style="display: none;"></div>
   </section>
 
-  <!-- 第四頁：顯示每場詳細 -->
   <section class="score-table" style="display: none;">
     <h2>每場詳細</h2>
     <table>
@@ -133,9 +129,7 @@
         <tr id="player-headers"></tr>
       </thead>
       <tbody id="score-records"></tbody>
-      <tfoot id="total-records">
-        <!-- 總計將會顯示在這裡 -->
-      </tfoot>
+      <tfoot id="total-records"></tfoot>
     </table>
     <button type="button" id="reset-scores" style="margin-top: 40px;">本日輸贏歸零</button>
   </section>
@@ -150,9 +144,9 @@
     const totalRecords = document.getElementById('total-records');
     const errorMessage = document.getElementById('error-message');
     const bonusInput = document.getElementById('bonus');
+    const submitScoreButton = document.getElementById('submit-score');
     const resetScoresButton = document.getElementById('reset-scores');
 
-    const commonPlayers = ["佳穎", "品安", "季村", "小學", "治杰", "小燁"];
     let players = [];
     let scores = [];
 
@@ -185,7 +179,6 @@
 
     function updateScoreTable() {
       scoreRecords.innerHTML = '';
-
       scores.slice().reverse().forEach((round, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `<td>${scores.length - index}</td>` + round.scores.map(score => `<td>${score}</td>`).join('');
@@ -197,8 +190,8 @@
       totalRecords.innerHTML = '';
       const totalRow = document.createElement('tr');
       totalRow.innerHTML = `<td>合計</td>` + totalScores.map(score => `<td>${score}</td>`).join('');
-      totalRow.style.fontWeight = 'bold';  // 設定粗體
-      totalRow.style.color = 'green';      // 設定綠色
+      totalRow.style.fontWeight = 'bold';
+      totalRow.style.color = 'green';
       totalRecords.appendChild(totalRow);
     }
 
@@ -222,14 +215,12 @@
           <label for="player${i + 1}">玩家 ${i + 1} 名字：</label>
           <select id="player${i + 1}" name="player${i + 1}" required>
             <option value="">-- 請選擇或輸入新玩家 --</option>
-            ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
             <option value="newPlayer">加入新玩家</option>
           </select>
           <input type="text" placeholder="或輸入新玩家" style="display:none" />
         `;
       }
 
-      // 監聽加入新玩家的選項，顯示對應的輸入框
       document.querySelectorAll('select').forEach(select => {
         select.addEventListener('change', function() {
           const inputBox = this.nextElementSibling;
@@ -280,6 +271,14 @@
       localStorage.setItem('scores', JSON.stringify(scores));
     });
 
+    bonusInput.addEventListener('change', function() {
+      if (this.value) {
+        submitScoreButton.style.display = 'inline';
+      } else {
+        submitScoreButton.style.display = 'none';
+      }
+    });
+
     const scoreForm = document.getElementById('score-form');
     scoreForm.addEventListener('submit', function(e) {
       e.preventDefault();
@@ -307,10 +306,12 @@
         bonus: bonusInput.value
       });
 
-      // 清空輸入框
+      // 清空輸入框並重置彩金選項
       players.forEach(player => {
         document.getElementById(player).value = '';
       });
+      bonusInput.value = ''; // 清空彩金選擇
+      submitScoreButton.style.display = 'none'; // 隱藏按鈕
 
       localStorage.setItem('scores', JSON.stringify(scores));
       errorMessage.style.display = 'none';
