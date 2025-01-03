@@ -228,6 +228,18 @@
           <input type="text" placeholder="或輸入新玩家" style="display:none" />
         `;
       }
+
+      // 監聽加入新玩家的選項，顯示對應的輸入框
+      document.querySelectorAll('select').forEach(select => {
+        select.addEventListener('change', function() {
+          const inputBox = this.nextElementSibling;
+          if (this.value === 'newPlayer') {
+            inputBox.style.display = 'inline';
+          } else {
+            inputBox.style.display = 'none';
+          }
+        });
+      });
     });
 
     playerNamesForm.addEventListener('submit', function(e) {
@@ -293,6 +305,11 @@
       scores.push({
         scores: currentScores,
         bonus: bonusInput.value
+      });
+
+      // 清空輸入框
+      players.forEach(player => {
+        document.getElementById(player).value = '';
       });
 
       localStorage.setItem('scores', JSON.stringify(scores));
