@@ -313,6 +313,10 @@
       localStorage.setItem('scores', JSON.stringify(scores));
       scoreForm.reset();
       bonusInput.value = '';
+
+      // 保證按鈕顯示
+      const submitButton = scoreForm.querySelector('button[type="submit"]');
+      submitButton.style.display = 'inline-block'; // 確保顯示按鈕
     });
 
     resetScoresButton.addEventListener('click', function() {
@@ -321,17 +325,11 @@
         localStorage.removeItem('scores');
         players = [];
         scores = [];
-        playerScoresDiv.innerHTML = '';
-        scoreRecords.innerHTML = '';
-        totalRecords.innerHTML = '';
-        document.querySelector('.player-setup').style.display = 'block';
-        document.querySelector('.player-names').style.display = 'none';
-        document.querySelector('.score-input').style.display = 'none';
-        document.querySelector('.score-table').style.display = 'none';
+        loadData();
       }
     });
 
-    loadData();
+    loadData(); 
   </script>
 </body>
 </html>
