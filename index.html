@@ -215,8 +215,9 @@
           <select id="player${i + 1}" name="player${i + 1}" required>
             <option value="">-- 請選擇或輸入新玩家 --</option>
             ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
+            <option value="new-player">加入新玩家</option>
           </select>
-          <input type="text" placeholder="或輸入新玩家" oninput="this.previousElementSibling.value=''" />
+          <input type="text" placeholder="或輸入新玩家" style="display: none;" />
         `;
       }
     });
@@ -230,7 +231,7 @@
       selects.forEach((select, index) => {
         const selectedPlayer = select.value.trim();
         const newPlayer = inputs[index].value.trim();
-        players.push(selectedPlayer || newPlayer);
+        players.push(selectedPlayer === 'new-player' && newPlayer ? newPlayer : selectedPlayer);
       });
 
       if (players.some(name => name === '')) {
