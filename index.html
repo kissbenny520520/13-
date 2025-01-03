@@ -267,26 +267,68 @@
     // 當選擇加入新玩家時顯示輸入框
     document.addEventListener('change', function(e) {
       if (e.target.tagName === 'SELECT' && e.target.value === 'new') {
-        const inputField = e.target.nextElementSibling;
-        inputField.style.display = 'block';
+        const input = e.target.nextElementSibling;
+        input.style.display = 'block';
       } else if (e.target.tagName === 'SELECT') {
-        const inputField = e.target.nextElementSibling;
-        inputField.style.display = 'none';
+        const input = e.target.nextElementSibling;
+        input.style.display = 'none';
       }
     });
 
-    bonusInput.addEventListener('change', function() {
-      // 確保按鈕顯示，彩金選擇後按鈕應該正常顯示
-      const bonusValue = bonusInput.value;
-      if (bonusValue) {
+    const scoreForm = document.getElementById('score-form');
+    scoreForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      if (!bonusInput.value) {
+        errorMessage.style.display = 'block';
+        errorMessage.textContent = '請選擇一個彩金';
+        return;
+      }
+
+      const currentScores = players.map(player => {
+        const score = parseInt(document.getElementById(player).value, 10);
+        return isNaN(score) ? 0 : score;
+      });
+
+      const totalScore = currentScores.reduce((sum, score) => sum + score, 0);
+      if (totalScore !== 0) {
+        errorMessage.style.display = 'block';
+        errorMessage.textContent = '此場比賽的總分數必須為0，請重新檢查分數。';
+        return;
+      } else {
         errorMessage.style.display = 'none';
       }
+
+      const bonus = bonusInput.value.trim();
+      scores.push({ scores: currentScores, bonus });
+
+      updateScoreTable();
+
+      // 即時更新每位玩家的總積分
+      players.forEach(player => {
+        const totalScore = scores.reduce((sum, round) => sum + round.scores[players.indexOf(player)] || 0, 0);
+        document.getElementById(`${player}-total`).textContent = `(${totalScore})`;
+      });
+
+      localStorage.setItem('scores', JSON.stringify(scores));
+      scoreForm.reset();
+      bonusInput.value = '';
     });
-    
+
     resetScoresButton.addEventListener('click', function() {
-      localStorage.removeItem('players');
-      localStorage.removeItem('scores');
-      location.reload();
+      if (confirm("確定要將本日輸贏歸零嗎？")) {
+        localStorage.removeItem('players');
+        localStorage.removeItem('scores');
+        players = [];
+        scores = [];
+        playerScoresDiv.innerHTML = '';
+        scoreRecords.innerHTML = '';
+        totalRecords.innerHTML = '';
+        document.querySelector('.player-setup').style.display = 'block';
+        document.querySelector('.player-names').style.display = 'none';
+        document.querySelector('.score-input').style.display = 'none';
+        document.querySelector('.score-table').style.display = 'none';
+      }
     });
 
     loadData();
