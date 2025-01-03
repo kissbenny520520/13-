@@ -219,7 +219,7 @@
       const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
       totalRecords.innerHTML = `<tr style="color: green; font-weight: bold;">
         <td>合計</td>
-        ${totalScores.map(total => `<td>(${total})</td>`).join('')}
+        ${totalScores.map(total => `<td>${total}</td>`).join('')}
         <td></td>
       </tr>`;
     }
