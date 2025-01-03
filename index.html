@@ -14,24 +14,38 @@
       color: red;
       font-weight: bold;
     }
-    h1 {
-      margin: 0;
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
     }
-    .player-setup, .player-names, .score-input, .score-table {
-      margin: 20px auto;
-      max-width: 600px;
+    .form-section {
+      margin-bottom: 20px;
     }
-    label, input, button {
+    .form-section label {
       display: block;
-      margin: 10px 0;
+      margin-top: 10px;
+    }
+    .form-section input, .form-section select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    .button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 20px;
     }
     th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
+      border: 1px solid #ddd;
+      padding: 8px;
       text-align: center;
     }
     th {
@@ -39,70 +53,39 @@
     }
     .error {
       color: red;
-      font-size: 14px;
       text-align: center;
-    }
-    .bonus-column {
-      color: red;
-      font-weight: bold;
-    }
-    .total-heading {
-      text-align: center;
-      color: red;
-      font-weight: bold;
-      font-size: 24px;
-    }
-    .player-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .player-row label,
-    .player-row input,
-    .player-row span {
-      margin-right: 10px;
-    }
-    .score-input input {
-      width: 5ch; /* 使每個輸入框的寬度適應五個字 */
-    }
-    .total-records tr {
-      font-weight: bold;
-      color: green; /* 使總計行的字體顯示為粗體綠色 */
     }
   </style>
 </head>
 <body>
-  <h1>大德機車行</h1>
-  <h2>13隻大戰</h2>
+  <div class="container">
+    <h1>大德機車行</h1>
+    <h2>13隻大戰</h2>
 
-  <section class="player-setup">
-    <h2> 玩家數量 </h2>
-    <form id="player-count-form">
-      <label for="player-count">選擇人數：</label>
-      <select id="player-count" required>
+    <!-- 玩家數量設定 -->
+    <div id="player-count-section" class="form-section">
+      <label for="player-count">選擇玩家數量 (3-5位)：</label>
+      <select id="player-count">
         <option value="3">3人</option>
         <option value="4">4人</option>
         <option value="5">5人</option>
       </select>
-      <button type="submit">開始輸贏</button>
-    </form>
-  </section>
+      <button class="button" onclick="startGame()">開始遊戲</button>
+    </div>
 
-  <section class="player-names" style="display: none;">
-    <h2>輸入玩家名稱</h2>
-    <form id="player-names-form">
+    <!-- 玩家名稱設定 -->
+    <div id="player-names-section" class="form-section" style="display: none;">
+      <h3>輸入玩家名稱</h3>
       <div id="player-name-inputs"></div>
-      <button type="submit">賴調燦!!!</button>
-    </form>
-  </section>
+      <button class="button" onclick="submitNames()">提交玩家名稱</button>
+    </div>
 
-  <section class="score-input" style="display: none;">
-    <h2>輸入每場輸贏</h2>
-    <form id="score-form">
-      <div id="player-scores"></div>
-      <label for="bonus">彩金：</label>
-      <select id="bonus" name="bonus" required>
-        <option value="">-- 請選擇彩金 --</option>
+    <!-- 輸入每場比賽結果 -->
+    <div id="score-input-section" class="form-section" style="display: none;">
+      <h3>輸入每場比賽結果</h3>
+      <div id="score-inputs"></div>
+      <label for="bonus">選擇彩金：</label>
+      <select id="bonus">
         <option value="A">A</option>
         <option value="2">2</option>
         <option value="3">3</option>
@@ -117,219 +100,131 @@
         <option value="Q">Q</option>
         <option value="K">K</option>
       </select>
-      <button type="submit">新增此場輸贏</button>
-    </form>
-    <div id="error-message" class="error" style="display: none;"></div>
-  </section>
+      <button class="button" onclick="submitScore()">新增此場輸贏</button>
+      <div id="error-message" class="error" style="display: none;"></div>
+    </div>
 
-  <section class="score-table" style="display: none;">
-    <h2>每場詳細</h2>
-    <table>
-      <thead>
-        <tr id="player-headers"></tr>
-      </thead>
-      <tbody id="score-records"></tbody>
-      <tfoot id="total-records">
-        <!-- 總計將會顯示在這裡 -->
-      </tfoot>
-    </table>
-    <button type="button" id="reset-scores" style="margin-top: 40px;">本日輸贏歸零</button>
-  </section>
+    <!-- 顯示比賽結果 -->
+    <div id="score-table-section" class="form-section" style="display: none;">
+      <h3>每場比賽結果</h3>
+      <table id="score-table">
+        <thead>
+          <tr id="player-headers"></tr>
+        </thead>
+        <tbody id="score-records"></tbody>
+        <tfoot id="total-records"></tfoot>
+      </table>
+      <button class="button" onclick="resetScores()">重置輸贏</button>
+    </div>
+  </div>
 
   <script>
-    const playerCountForm = document.getElementById('player-count-form');
-    const playerNamesForm = document.getElementById('player-names-form');
-    const playerNameInputsDiv = document.getElementById('player-name-inputs');
-    const playerScoresDiv = document.getElementById('player-scores');
-    const playerHeaders = document.getElementById('player-headers');
-    const scoreRecords = document.getElementById('score-records');
-    const totalRecords = document.getElementById('total-records');
-    const errorMessage = document.getElementById('error-message');
-    const bonusInput = document.getElementById('bonus');
-    const resetScoresButton = document.getElementById('reset-scores');
-
-    const commonPlayers = ["佳穎", "品安", "季村", "小學", "治杰", "小燁"];
     let players = [];
     let scores = [];
 
-    function loadData() {
-      players = JSON.parse(localStorage.getItem('players')) || [];
-      scores = JSON.parse(localStorage.getItem('scores')) || [];
+    // 開始遊戲，根據選擇的玩家數量來顯示玩家名稱輸入
+    function startGame() {
+      const playerCount = parseInt(document.getElementById("player-count").value);
+      players = [];
+      const playerNameInputs = document.getElementById("player-name-inputs");
+      playerNameInputs.innerHTML = '';
 
-      if (players.length > 0) {
-        document.querySelector('.player-setup').style.display = 'none';
-        document.querySelector('.player-names').style.display = 'none';
-        document.querySelector('.score-input').style.display = 'block';
-        document.querySelector('.score-table').style.display = 'block';
-        
-        playerScoresDiv.innerHTML = players.map(player => {
-          const totalScore = scores.reduce((sum, round) => sum + (round.scores[players.indexOf(player)] || 0), 0);
-          return `
-            <div class="player-row">
-              <label for="${player}">${player}：</label>
-              <input type="number" id="${player}" name="${player}" required>
-              <span id="${player}-total" style="color: green; font-weight: bold;">(${totalScore})</span>
-            </div>
-          `;
-        }).join('');
-
-        playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
-        
-        updateScoreTable();
+      for (let i = 0; i < playerCount; i++) {
+        playerNameInputs.innerHTML += `
+          <label for="player${i}">玩家 ${i + 1} 名字：</label>
+          <input type="text" id="player${i}" required placeholder="請輸入玩家名稱">
+        `;
       }
+
+      document.getElementById("player-count-section").style.display = "none";
+      document.getElementById("player-names-section").style.display = "block";
     }
 
-    function updateScoreTable() {
+    // 提交玩家名稱
+    function submitNames() {
+      const playerCount = players.length;
+      players = [];
+      for (let i = 0; i < playerCount; i++) {
+        const playerName = document.getElementById(`player${i}`).value.trim();
+        if (playerName === '') {
+          alert("玩家名稱不能為空！");
+          return;
+        }
+        players.push(playerName);
+      }
+
+      document.getElementById("player-names-section").style.display = "none";
+      document.getElementById("score-input-section").style.display = "block";
+      renderScoreInputs();
+    }
+
+    // 渲染每場比賽的分數輸入框
+    function renderScoreInputs() {
+      const scoreInputs = document.getElementById("score-inputs");
+      scoreInputs.innerHTML = '';
+      players.forEach(player => {
+        scoreInputs.innerHTML += `
+          <label for="${player}">${player}：</label>
+          <input type="number" id="${player}" required placeholder="輸入分數">
+        `;
+      });
+    }
+
+    // 提交每場比賽分數
+    function submitScore() {
+      const bonus = document.getElementById("bonus").value;
+      const currentScores = players.map(player => {
+        const score = parseInt(document.getElementById(player).value);
+        return isNaN(score) ? 0 : score;
+      });
+
+      if (currentScores.reduce((a, b) => a + b, 0) !== 0) {
+        document.getElementById("error-message").style.display = "block";
+        document.getElementById("error-message").textContent = "每場比賽的總分數必須為 0！";
+        return;
+      } else {
+        document.getElementById("error-message").style.display = "none";
+      }
+
+      scores.push({ scores: currentScores, bonus });
+      renderScoreTable();
+      renderScoreInputs();
+    }
+
+    // 渲染比賽結果表格
+    function renderScoreTable() {
+      const scoreRecords = document.getElementById("score-records");
+      const playerHeaders = document.getElementById("player-headers");
+
       scoreRecords.innerHTML = '';
-      
+      playerHeaders.innerHTML = '<th>場次</th>' + players.map(player => `<th>${player}</th>`).join('') + '<th>彩金</th>';
+
       scores.slice().reverse().forEach((round, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `<td>${scores.length - index}</td>` + round.scores.map(score => `<td>${score}</td>`).join('');
-        row.innerHTML += `<td class="bonus-column">${round.bonus}</td>`;
+        row.innerHTML += `<td>${round.bonus}</td>`;
         scoreRecords.appendChild(row);
       });
 
       const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
-      totalRecords.innerHTML = '';
       const totalRow = document.createElement('tr');
-      totalRow.innerHTML = `<td>合計</td>` + totalScores.map(score => `<td>${score}</td>`).join('');
-      totalRow.style.fontWeight = 'bold';  // 設定粗體
-      totalRow.style.color = 'green';      // 設定綠色
-      totalRecords.appendChild(totalRow);
+      totalRow.innerHTML = `<td>總計</td>` + totalScores.map(score => `<td>${score}</td>`).join('');
+      totalRow.innerHTML += '<td></td>';  // 空白欄位
+      document.getElementById("total-records").innerHTML = '';
+      document.getElementById("total-records").appendChild(totalRow);
+
+      document.getElementById("score-table-section").style.display = "block";
     }
 
-    playerCountForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const playerCount = parseInt(document.getElementById('player-count').value, 10);
-      if (playerCount < 3 || playerCount > 5) {
-        alert('請選擇3至5位玩家');
-        return;
-      }
-      document.querySelector('.player-setup').style.display = 'none';
-      document.querySelector('.player-names').style.display = 'block';
-
-      playerNameInputsDiv.innerHTML = '';
-      for (let i = 0; i < playerCount; i++) {
-        playerNameInputsDiv.innerHTML += `
-          <label for="player${i + 1}">玩家 ${i + 1} 名字：</label>
-          <select id="player${i + 1}" name="player${i + 1}" required>
-            <option value="">-- 請選擇或輸入新玩家 --</option>
-            ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
-            <option value="new">加入新玩家</option>
-          </select>
-          <input type="text" placeholder="或輸入新玩家" style="display:none" id="new-player${i + 1}" />
-        `;
-      }
-    });
-
-    playerNamesForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      players = [];
-      const selects = document.querySelectorAll('.player-names select');
-      const inputs = document.querySelectorAll('.player-names input[type="text"]');
-      
-      selects.forEach((select, index) => {
-        const selectedPlayer = select.value.trim();
-        const newPlayer = inputs[index].value.trim();
-        if (selectedPlayer === 'new' && newPlayer !== '') {
-          players.push(newPlayer);
-        } else {
-          players.push(selectedPlayer);
-        }
-      });
-
-      if (players.some(name => name === '')) {
-        alert('請輸入所有玩家的名稱');
-        return;
-      }
-
-      document.querySelector('.player-names').style.display = 'none';
-      document.querySelector('.score-input').style.display = 'block';
-      document.querySelector('.score-table').style.display = 'block';
-
-      playerScoresDiv.innerHTML = players.map(player => {
-        const totalScore = scores.reduce((sum, round) => sum + (round.scores[players.indexOf(player)] || 0), 0);
-        return `
-          <div class="player-row">
-            <label for="${player}">${player}：</label>
-            <input type="number" id="${player}" name="${player}" required>
-            <span id="${player}-total" style="color: green; font-weight: bold;">(${totalScore})</span>
-          </div>
-        `;
-      }).join('');
-
-      playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
-
-      localStorage.setItem('players', JSON.stringify(players));
-      localStorage.setItem('scores', JSON.stringify(scores));
-    });
-
-    // 當選擇加入新玩家時顯示輸入框
-    document.addEventListener('change', function(e) {
-      if (e.target.tagName === 'SELECT' && e.target.value === 'new') {
-        const input = e.target.nextElementSibling;
-        input.style.display = 'block';
-      } else if (e.target.tagName === 'SELECT') {
-        const input = e.target.nextElementSibling;
-        input.style.display = 'none';
-      }
-    });
-
-    const scoreForm = document.getElementById('score-form');
-    scoreForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      if (!bonusInput.value) {
-        errorMessage.style.display = 'block';
-        errorMessage.textContent = '請選擇一個彩金';
-        return;
-      }
-
-      const currentScores = players.map(player => {
-        const score = parseInt(document.getElementById(player).value, 10);
-        return isNaN(score) ? 0 : score;
-      });
-
-      const totalScore = currentScores.reduce((sum, score) => sum + score, 0);
-      if (totalScore !== 0) {
-        errorMessage.style.display = 'block';
-        errorMessage.textContent = '此場比賽的總分數必須為0，請重新檢查分數。';
-        return;
-      } else {
-        errorMessage.style.display = 'none';
-      }
-
-      const bonus = bonusInput.value.trim();
-      scores.push({ scores: currentScores, bonus });
-
-      updateScoreTable();
-
-      // 即時更新每位玩家的總積分
-      players.forEach(player => {
-        const totalScore = scores.reduce((sum, round) => sum + round.scores[players.indexOf(player)] || 0, 0);
-        document.getElementById(`${player}-total`).textContent = `(${totalScore})`;
-      });
-
-      localStorage.setItem('scores', JSON.stringify(scores));
-      scoreForm.reset();
-      bonusInput.value = '';
-
-      // 保證按鈕顯示
-      const submitButton = scoreForm.querySelector('button[type="submit"]');
-      submitButton.style.display = 'inline-block'; // 確保顯示按鈕
-    });
-
-    resetScoresButton.addEventListener('click', function() {
-      if (confirm("確定要將本日輸贏歸零嗎？")) {
-        localStorage.removeItem('players');
-        localStorage.removeItem('scores');
+    // 重置比賽結果
+    function resetScores() {
+      if (confirm("確定要重置所有輸贏嗎？")) {
         players = [];
         scores = [];
-        loadData();
+        document.getElementById("score-table-section").style.display = "none";
+        document.getElementById("player-count-section").style.display = "block";
       }
-    });
-
-    loadData(); 
+    }
   </script>
 </body>
 </html>
