@@ -3,247 +3,207 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>大德機車行</title>
+  <title>13隻遊戲</title>
   <style>
     body {
-      font-family: "標楷體", serif;
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
       margin: 20px;
     }
     h1, h2 {
       text-align: center;
-      color: red;
-      font-weight: bold;
+      color: #333;
     }
     h1 {
-      margin: 0;
+      margin-bottom: 0;
     }
-    .player-setup, .player-names, .score-input, .score-table {
+    section {
       margin: 20px auto;
       max-width: 600px;
     }
     label, input, button, select {
       display: block;
-      margin: 10px 0;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 16px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 20px;
     }
     th, td {
-      border: 1px solid #ccc;
+      border: 1px solid #ddd;
       padding: 10px;
       text-align: center;
     }
     th {
-      background-color: #f4f4f4;
+      background: #f4f4f4;
     }
-    .error {
-      color: red;
-      font-size: 14px;
-      text-align: center;
-    }
-    .bonus-column {
-      color: red;
-      font-weight: bold;
-    }
-    .total-heading {
-      text-align: center;
-      color: red;
-      font-weight: bold;
-      font-size: 24px;
-    }
-    .player-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .player-row label,
-    .player-row input,
-    .player-row span {
-      margin-right: 10px;
-    }
-    .score-input input {
-      width: 5ch;
-    }
-    .total-records tr {
+    .total-row td {
+      background-color: #dff0d8;
       font-weight: bold;
       color: green;
+    }
+    button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
     }
   </style>
 </head>
 <body>
-  <h1>大德機車行</h1>
-  <h2>13隻大戰</h2>
+  <h1>13隻遊戲計分器</h1>
 
-  <section class="player-setup">
-    <h2> 玩家數量 </h2>
-    <form id="player-count-form">
-      <label for="player-count">選擇人數：</label>
-      <select id="player-count" required>
-        <option value="3">3人</option>
-        <option value="4">4人</option>
-        <option value="5">5人</option>
-      </select>
-      <button type="submit">開始輸贏</button>
-    </form>
+  <section id="page1">
+    <h2>選擇玩家數量</h2>
+    <label for="player-count">玩家人數</label>
+    <select id="player-count">
+      <option value="3">3人</option>
+      <option value="4">4人</option>
+      <option value="5">5人</option>
+    </select>
+    <button id="go-to-page2">下一步</button>
   </section>
 
-  <section class="player-names" style="display: none;">
+  <section id="page2" style="display:none;">
     <h2>輸入玩家名稱</h2>
-    <form id="player-names-form">
-      <div id="player-name-inputs"></div>
-      <button type="submit">賴調燦!!!</button>
-    </form>
+    <form id="player-names-form"></form>
+    <button id="go-to-page3">下一步</button>
   </section>
 
-  <section class="score-input" style="display: none;">
-    <h2>輸入每場輸贏</h2>
+  <section id="page3" style="display:none;">
+    <h2>記錄每場積分</h2>
     <form id="score-form">
-      <div id="player-scores"></div>
-      <label for="bonus">彩金：</label>
-      <select id="bonus" name="bonus" required>
-        <option value="">-- 請選擇彩金 --</option>
+      <div id="score-inputs"></div>
+      <label for="bonus">彩金</label>
+      <select id="bonus">
         <option value="A">A</option>
         <option value="2">2</option>
         <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-        <option value="8">8</option>
-        <option value="9">9</option>
-        <option value="10">10</option>
-        <option value="J">J</option>
-        <option value="Q">Q</option>
-        <option value="K">K</option>
+        <!-- 其他選項 -->
       </select>
-      <button type="submit">新增此場輸贏</button>
+      <button type="submit">新增本場輸贏</button>
     </form>
-    <div id="error-message" class="error" style="display: none;"></div>
-  </section>
 
-  <section class="score-table" style="display: none;">
     <h2>每場詳細</h2>
     <table>
-      <thead>
-        <tr id="player-headers"></tr>
-      </thead>
-      <tbody id="score-records"></tbody>
-      <tfoot id="total-records"></tfoot>
+      <thead id="table-headers"></thead>
+      <tbody id="table-body"></tbody>
+      <tfoot id="table-footer">
+        <tr class="total-row"></tr>
+      </tfoot>
     </table>
-    <button type="button" id="reset-scores" style="margin-top: 40px;">本日輸贏歸零</button>
+    <button id="reset-scores">本日輸贏歸零</button>
   </section>
 
   <script>
-    const playerCountForm = document.getElementById('player-count-form');
-    const playerNamesForm = document.getElementById('player-names-form');
-    const playerNameInputsDiv = document.getElementById('player-name-inputs');
-    const playerScoresDiv = document.getElementById('player-scores');
-    const playerHeaders = document.getElementById('player-headers');
-    const scoreRecords = document.getElementById('score-records');
-    const totalRecords = document.getElementById('total-records');
-    const errorMessage = document.getElementById('error-message');
-    const bonusInput = document.getElementById('bonus');
-    const resetScoresButton = document.getElementById('reset-scores');
+    // 切換頁面相關變數
+    const page1 = document.getElementById('page1');
+    const page2 = document.getElementById('page2');
+    const page3 = document.getElementById('page3');
 
-    const commonPlayers = ["佳穎", "品安", "季村", "小學", "治杰", "小燁"];
+    // 玩家資料相關變數
+    const playerCountSelect = document.getElementById('player-count');
+    const playerNamesForm = document.getElementById('player-names-form');
+    const scoreInputsDiv = document.getElementById('score-inputs');
+    const tableHeaders = document.getElementById('table-headers');
+    const tableBody = document.getElementById('table-body');
+    const tableFooter = document.getElementById('table-footer');
+
     let players = [];
     let scores = [];
 
-    playerCountForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const playerCount = parseInt(document.getElementById('player-count').value, 10);
-      document.querySelector('.player-setup').style.display = 'none';
-      document.querySelector('.player-names').style.display = 'block';
+    // 第一頁下一步
+    document.getElementById('go-to-page2').addEventListener('click', () => {
+      const playerCount = parseInt(playerCountSelect.value);
+      playerNamesForm.innerHTML = '';
 
-      playerNameInputsDiv.innerHTML = Array(playerCount).fill('').map((_, i) => `
-        <div>
-          <label for="player-${i + 1}">玩家 ${i + 1} 名稱：</label>
-          <select id="player-${i + 1}" name="player-${i + 1}" required>
-            <option value="">-- 選擇玩家 --</option>
-            ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
-            <option value="new">新增新玩家</option>
-          </select>
-          <input type="text" id="player-${i + 1}-new" name="player-${i + 1}-new" placeholder="輸入新玩家" style="display:none;" />
-        </div>
-      `).join('');
-    });
-
-    playerNamesForm.addEventListener('change', function (e) {
-      if (e.target.tagName === 'SELECT' && e.target.value === 'new') {
-        const newInput = document.getElementById(`${e.target.id}-new`);
-        newInput.style.display = 'block';
-      } else if (e.target.tagName === 'SELECT') {
-        const newInput = document.getElementById(`${e.target.id}-new`);
-        newInput.style.display = 'none';
+      for (let i = 0; i < playerCount; i++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = `玩家${i + 1}名稱`;
+        input.required = true;
+        playerNamesForm.appendChild(input);
       }
+      page1.style.display = 'none';
+      page2.style.display = 'block';
     });
 
-    playerNamesForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      players = [];
-      const inputs = document.querySelectorAll('.player-names select, .player-names input');
-      inputs.forEach(input => {
-        if (input.tagName === 'SELECT' && input.value !== 'new' && input.value) {
-          players.push(input.value);
-        } else if (input.tagName === 'INPUT' && input.value) {
-          players.push(input.value);
-        }
-      });
-
-      document.querySelector('.player-names').style.display = 'none';
-      document.querySelector('.score-input').style.display = 'block';
-      document.querySelector('.score-table').style.display = 'block';
-
-      playerScoresDiv.innerHTML = players.map(player => `
-        <div class="player-row">
-          <label for="${player}">${player}：</label>
-          <input type="number" id="${player}" name="${player}" required>
-        </div>
-      `).join('');
-
-      playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
-      updateScoreTable();
-    });
-
-    function updateScoreTable() {
-      scoreRecords.innerHTML = scores.map((round, index) => `
-        <tr>
-          <td>${index + 1}</td>
-          ${round.scores.map(score => `<td>${score}</td>`).join('')}
-          <td class="bonus-column">${round.bonus}</td>
-        </tr>
-      `).join('');
-      
-      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
-      totalRecords.innerHTML = `<tr>
-        <td>合計</td>
-        ${totalScores.map(total => `<td>${total}</td>`).join('')}
-        <td></td>
-      </tr>`;
-    }
-
-    document.getElementById('score-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      const currentScores = players.map(player => parseInt(document.getElementById(player).value, 10) || 0);
-      const total = currentScores.reduce((sum, score) => sum + score, 0);
-      if (total !== 0) {
-        errorMessage.textContent = '總分必須為0！';
-        errorMessage.style.display = 'block';
+    // 第二頁下一步
+    document.getElementById('go-to-page3').addEventListener('click', () => {
+      const inputs = playerNamesForm.querySelectorAll('input');
+      players = Array.from(inputs).map(input => input.value.trim());
+      if (players.includes('')) {
+        alert('請輸入所有玩家名稱');
         return;
       }
-      errorMessage.style.display = 'none';
 
-      scores.push({ scores: currentScores, bonus: bonusInput.value });
-      updateScoreTable();
-      e.target.reset();
+      // 初始化第三頁
+      scoreInputsDiv.innerHTML = '';
+      tableHeaders.innerHTML = '<th>場次</th>';
+      tableFooter.querySelector('.total-row').innerHTML = `<td>合計</td>`;
+      players.forEach(player => {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.placeholder = `${player}積分`;
+        input.required = true;
+        scoreInputsDiv.appendChild(input);
+
+        // 表格初始化
+        tableHeaders.innerHTML += `<th>${player}</th>`;
+        tableFooter.querySelector('.total-row').innerHTML += `<td>0</td>`;
+      });
+
+      page2.style.display = 'none';
+      page3.style.display = 'block';
     });
 
-    resetScoresButton.addEventListener('click', function () {
-      if (confirm('確定要歸零所有分數？')) {
-        players = [];
-        scores = [];
-        location.reload();
+    // 記錄積分
+    document.getElementById('score-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const inputs = scoreInputsDiv.querySelectorAll('input');
+      const bonus = document.getElementById('bonus').value;
+
+      if (!bonus) {
+        alert('請選擇彩金');
+        return;
+      }
+
+      const currentScores = Array.from(inputs).map(input => parseInt(input.value) || 0);
+      scores.push(currentScores);
+
+      // 更新表格
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${scores.length}</td>`;
+      currentScores.forEach(score => {
+        row.innerHTML += `<td>${score}</td>`;
+      });
+      tableBody.appendChild(row);
+
+      // 更新合計
+      const totalCells = tableFooter.querySelector('.total-row').children;
+      currentScores.forEach((score, index) => {
+        totalCells[index + 1].textContent = parseInt(totalCells[index + 1].textContent) + score;
+      });
+
+      // 清空輸入欄位
+      inputs.forEach(input => input.value = '');
+      document.getElementById('bonus').value = '';
+    });
+
+    // 重置積分
+    document.getElementById('reset-scores').addEventListener('click', () => {
+      scores = [];
+      tableBody.innerHTML = '';
+      const totalCells = tableFooter.querySelector('.total-row').children;
+      for (let i = 1; i < totalCells.length; i++) {
+        totalCells[i].textContent = '0';
       }
     });
   </script>
