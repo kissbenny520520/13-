@@ -65,8 +65,11 @@
     .score-input input {
       width: 5ch;
     }
-    .total-records tr td {
+    .total-records tr {
       font-weight: bold;
+      color: green;
+    }
+    .total-heading {
       color: green;
     }
   </style>
@@ -148,21 +151,13 @@
 
     const commonPlayers = ["佳穎", "品安", "季村", "小學", "治杰", "小燁"];
     let players = [];
-    let scores = [];
-
-    // 檢查 localStorage 是否有保存的資料
-    if (localStorage.getItem('players')) {
-      players = JSON.parse(localStorage.getItem('players'));
-      scores = JSON.parse(localStorage.getItem('scores'));
-      updateScoreTable();
-      document.querySelector('.score-table').style.display = 'block';
-      document.querySelector('.score-input').style.display = 'block';
-      document.querySelector('.player-names').style.display = 'none';
-    }
+    let scores = JSON.parse(localStorage.getItem('scores')) || [];
+    let playerCount = localStorage.getItem('playerCount') || 3;
 
     playerCountForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      const playerCount = parseInt(document.getElementById('player-count').value, 10);
+      playerCount = parseInt(document.getElementById('player-count').value, 10);
+      localStorage.setItem('playerCount', playerCount);
       document.querySelector('.player-setup').style.display = 'none';
       document.querySelector('.player-names').style.display = 'block';
 
@@ -179,16 +174,6 @@
       `).join('');
     });
 
-    playerNamesForm.addEventListener('change', function (e) {
-      if (e.target.tagName === 'SELECT' && e.target.value === 'new') {
-        const newInput = document.getElementById(`${e.target.id}-new`);
-        newInput.style.display = 'block';
-      } else if (e.target.tagName === 'SELECT') {
-        const newInput = document.getElementById(`${e.target.id}-new`);
-        newInput.style.display = 'none';
-      }
-    });
-
     playerNamesForm.addEventListener('submit', function (e) {
       e.preventDefault();
       players = [];
@@ -201,7 +186,6 @@
         }
       });
 
-      // 將玩家資料存儲到 localStorage
       localStorage.setItem('players', JSON.stringify(players));
 
       document.querySelector('.player-names').style.display = 'none';
@@ -212,25 +196,27 @@
         <div class="player-row">
           <label for="${player}">${player}：</label>
           <input type="number" id="${player}" name="${player}" required>
+          <span>積分：</span>
         </div>
       `).join('');
 
-      playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
+      playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>' + '<th>總積分</th>';
       updateScoreTable();
     });
 
     function updateScoreTable() {
-      scoreRecords.innerHTML = scores.map((round, index) => `
+      scoreRecords.innerHTML = scores.slice().reverse().map((round, index) => `
         <tr>
           <td>${index + 1}</td>
           ${round.scores.map(score => `<td>${score}</td>`).join('')}
           <td class="bonus-column">${round.bonus}</td>
+          <td>${round.total}</td>
         </tr>
       `).join('');
       
       const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
       totalRecords.innerHTML = `<tr>
-        <td>合計</td>
+        <td class="total-heading">合計</td>
         ${totalScores.map(total => `<td>${total}</td>`).join('')}
         <td></td>
       </tr>`;
@@ -247,9 +233,8 @@
       }
       errorMessage.style.display = 'none';
 
-      scores.push({ scores: currentScores, bonus: bonusInput.value });
-
-      // 將分數資料儲存到 localStorage
+      const bonus = bonusInput.value;
+      scores.push({ scores: currentScores, bonus, total });
       localStorage.setItem('scores', JSON.stringify(scores));
 
       updateScoreTable();
@@ -260,9 +245,31 @@
       if (confirm('確定要歸零所有分數？')) {
         players = [];
         scores = [];
-        localStorage.removeItem('players');
         localStorage.removeItem('scores');
+        localStorage.removeItem('players');
         location.reload();
+      }
+    });
+
+    window.addEventListener('load', () => {
+      const savedPlayers = JSON.parse(localStorage.getItem('players'));
+      if (savedPlayers) {
+        players = savedPlayers;
+        document.querySelector('.player-setup').style.display = 'none';
+        document.querySelector('.player-names').style.display = 'none';
+        document.querySelector('.score-input').style.display = 'block';
+        document.querySelector('.score-table').style.display = 'block';
+
+        playerScoresDiv.innerHTML = players.map(player => `
+          <div class="player-row">
+            <label for="${player}">${player}：</label>
+            <input type="number" id="${player}" name="${player}" required>
+            <span>積分：</span>
+          </div>
+        `).join('');
+
+        playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>' + '<th>總積分</th>';
+        updateScoreTable();
       }
     });
   </script>
