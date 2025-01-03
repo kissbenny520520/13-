@@ -65,7 +65,6 @@
     .score-input input {
       width: 5ch;
     }
-    /* 確保合計行的字體是粗體且顏色是綠色 */
     .total-records tr td {
       font-weight: bold;
       color: green;
@@ -151,6 +150,16 @@
     let players = [];
     let scores = [];
 
+    // 檢查 localStorage 是否有保存的資料
+    if (localStorage.getItem('players')) {
+      players = JSON.parse(localStorage.getItem('players'));
+      scores = JSON.parse(localStorage.getItem('scores'));
+      updateScoreTable();
+      document.querySelector('.score-table').style.display = 'block';
+      document.querySelector('.score-input').style.display = 'block';
+      document.querySelector('.player-names').style.display = 'none';
+    }
+
     playerCountForm.addEventListener('submit', function (e) {
       e.preventDefault();
       const playerCount = parseInt(document.getElementById('player-count').value, 10);
@@ -191,6 +200,9 @@
           players.push(input.value);
         }
       });
+
+      // 將玩家資料存儲到 localStorage
+      localStorage.setItem('players', JSON.stringify(players));
 
       document.querySelector('.player-names').style.display = 'none';
       document.querySelector('.score-input').style.display = 'block';
@@ -236,6 +248,10 @@
       errorMessage.style.display = 'none';
 
       scores.push({ scores: currentScores, bonus: bonusInput.value });
+
+      // 將分數資料儲存到 localStorage
+      localStorage.setItem('scores', JSON.stringify(scores));
+
       updateScoreTable();
       e.target.reset();
     });
@@ -244,6 +260,8 @@
       if (confirm('確定要歸零所有分數？')) {
         players = [];
         scores = [];
+        localStorage.removeItem('players');
+        localStorage.removeItem('scores');
         location.reload();
       }
     });
