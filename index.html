@@ -25,21 +25,53 @@
       display: block;
       margin: 10px 0;
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .error {
+      color: red;
+      font-size: 14px;
+      text-align: center;
+    }
+    .bonus-column {
+      color: red;
+      font-weight: bold;
+    }
+    .total-heading {
+      text-align: center;
+      color: red;
+      font-weight: bold;
+      font-size: 24px;
+    }
     .player-row {
       display: flex;
       align-items: center;
       margin-bottom: 10px;
     }
     .player-row label,
-    .player-row input {
+    .player-row input,
+    .player-row span {
       margin-right: 10px;
+    }
+    .score-input input {
+      width: 5ch;
+    }
+    .total-records tr {
+      font-weight: bold;
+      color: green;
     }
     .total-score {
       color: green;
       font-weight: bold;
-    }
-    .score-input input {
-      width: 5ch;
     }
   </style>
 </head>
@@ -64,7 +96,7 @@
     <h2>輸入玩家名稱</h2>
     <form id="player-names-form">
       <div id="player-name-inputs"></div>
-      <button type="submit">確認名稱</button>
+      <button type="submit">賴調燦!!!</button>
     </form>
   </section>
 
@@ -91,14 +123,34 @@
       </select>
       <button type="submit">新增此場輸贏</button>
     </form>
+    <div id="error-message" class="error" style="display: none;"></div>
+  </section>
+
+  <section class="score-table" style="display: none;">
+    <h2>每場詳細</h2>
+    <table>
+      <thead>
+        <tr id="player-headers"></tr>
+      </thead>
+      <tbody id="score-records"></tbody>
+      <tfoot id="total-records"></tfoot>
+    </table>
+    <button type="button" id="reset-scores" style="margin-top: 40px;">本日輸贏歸零</button>
   </section>
 
   <script>
     const playerCountForm = document.getElementById('player-count-form');
     const playerNamesForm = document.getElementById('player-names-form');
+    const playerNameInputsDiv = document.getElementById('player-name-inputs');
     const playerScoresDiv = document.getElementById('player-scores');
+    const playerHeaders = document.getElementById('player-headers');
+    const scoreRecords = document.getElementById('score-records');
+    const totalRecords = document.getElementById('total-records');
+    const errorMessage = document.getElementById('error-message');
     const bonusInput = document.getElementById('bonus');
+    const resetScoresButton = document.getElementById('reset-scores');
 
+    const commonPlayers = ["佳穎", "品安", "季村", "小學", "治杰", "小燁"];
     let players = [];
     let scores = [];
     let totalScores = [];
@@ -109,48 +161,102 @@
       document.querySelector('.player-setup').style.display = 'none';
       document.querySelector('.player-names').style.display = 'block';
 
-      const playerNameInputsDiv = document.getElementById('player-name-inputs');
       playerNameInputsDiv.innerHTML = Array(playerCount).fill('').map((_, i) => `
         <div>
           <label for="player-${i + 1}">玩家 ${i + 1} 名稱：</label>
-          <input type="text" id="player-${i + 1}" name="player-${i + 1}" required />
+          <select id="player-${i + 1}" name="player-${i + 1}" required>
+            <option value="">-- 選擇玩家 --</option>
+            ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
+            <option value="new">新增新玩家</option>
+          </select>
+          <input type="text" id="player-${i + 1}-new" name="player-${i + 1}-new" placeholder="輸入新玩家" style="display:none;" />
         </div>
       `).join('');
+    });
+
+    playerNamesForm.addEventListener('change', function (e) {
+      if (e.target.tagName === 'SELECT' && e.target.value === 'new') {
+        const newInput = document.getElementById(`${e.target.id}-new`);
+        newInput.style.display = 'block';
+      } else if (e.target.tagName === 'SELECT') {
+        const newInput = document.getElementById(`${e.target.id}-new`);
+        newInput.style.display = 'none';
+      }
     });
 
     playerNamesForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      players = Array.from(document.querySelectorAll('#player-name-inputs input')).map(input => input.value.trim());
-      totalScores = Array(players.length).fill(0);
+      players = [];
+      totalScores = Array(players.length).fill(0); // Initialize totalScores
+      const inputs = document.querySelectorAll('.player-names select, .player-names input');
+      inputs.forEach(input => {
+        if (input.tagName === 'SELECT' && input.value !== 'new' && input.value) {
+          players.push(input.value);
+        } else if (input.tagName === 'INPUT' && input.value) {
+          players.push(input.value);
+        }
+      });
 
       document.querySelector('.player-names').style.display = 'none';
       document.querySelector('.score-input').style.display = 'block';
+      document.querySelector('.score-table').style.display = 'block';
 
-      playerScoresDiv.innerHTML = players.map((player, index) => `
+      playerScoresDiv.innerHTML = players.map(player => `
         <div class="player-row">
           <label for="${player}">${player}：</label>
-          <input type="number" id="${player}" name="${player}" required />
-          <span class="total-score" id="total-${index}">${totalScores[index]}</span>
+          <input type="number" id="${player}" name="${player}" required>
+          <span id="total-${player}" class="total-score">總積分: 0</span>
         </div>
       `).join('');
+
+      playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
+      updateScoreTable();
     });
+
+    function updateScoreTable() {
+      scoreRecords.innerHTML = scores.map((round, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          ${round.scores.map(score => `<td>${score}</td>`).join('')}
+          <td class="bonus-column">${round.bonus}</td>
+        </tr>
+      `).join('');
+      
+      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
+      totalRecords.innerHTML = `<tr>
+        <td>合計</td>
+        ${totalScores.map(total => `<td>${total}</td>`).join('')}
+        <td></td>
+      </tr>`;
+      
+      // Update the total score for each player
+      players.forEach((player, i) => {
+        document.getElementById(`total-${player}`).textContent = `總積分: ${totalScores[i]}`;
+      });
+    }
 
     document.getElementById('score-form').addEventListener('submit', function (e) {
       e.preventDefault();
       const currentScores = players.map(player => parseInt(document.getElementById(player).value, 10) || 0);
       const total = currentScores.reduce((sum, score) => sum + score, 0);
-
       if (total !== 0) {
-        alert('總分必須為 0！');
+        errorMessage.textContent = '總分必須為0！';
+        errorMessage.style.display = 'block';
         return;
       }
+      errorMessage.style.display = 'none';
 
-      scores.push(currentScores);
-      players.forEach((_, i) => {
-        totalScores[i] += currentScores[i];
-        document.getElementById(`total-${i}`).textContent = totalScores[i];
-      });
+      scores.push({ scores: currentScores, bonus: bonusInput.value });
+      updateScoreTable();
       e.target.reset();
+    });
+
+    resetScoresButton.addEventListener('click', function () {
+      if (confirm('確定要歸零所有分數？')) {
+        players = [];
+        scores = [];
+        location.reload();
+      }
     });
   </script>
 </body>
