@@ -69,10 +69,6 @@
       font-weight: bold;
       color: green; /* 使總計行的字體顯示為粗體綠色 */
     }
-    .new-player-input {
-      display: none;
-      margin-top: 10px;
-    }
   </style>
 </head>
 <body>
@@ -219,23 +215,11 @@
           <select id="player${i + 1}" name="player${i + 1}" required>
             <option value="">-- 請選擇或輸入新玩家 --</option>
             ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
-            <option value="newPlayer">加入新玩家</option>
+            <option value="new">加入新玩家</option>
           </select>
-          <input type="text" placeholder="或輸入新玩家" class="new-player-input" />
+          <input type="text" placeholder="或輸入新玩家" style="display:none;" />
         `;
       }
-
-      // 監聽選擇新增玩家的行為
-      document.querySelectorAll('select').forEach(select => {
-        select.addEventListener('change', function() {
-          const inputField = this.nextElementSibling;
-          if (this.value === 'newPlayer') {
-            inputField.style.display = 'block'; // 顯示輸入框
-          } else {
-            inputField.style.display = 'none'; // 隱藏輸入框
-          }
-        });
-      });
     });
 
     playerNamesForm.addEventListener('submit', function(e) {
@@ -247,7 +231,7 @@
       selects.forEach((select, index) => {
         const selectedPlayer = select.value.trim();
         const newPlayer = inputs[index].value.trim();
-        players.push(selectedPlayer === 'newPlayer' ? newPlayer : selectedPlayer);
+        players.push(selectedPlayer === 'new' ? newPlayer : selectedPlayer);
       });
 
       if (players.some(name => name === '')) {
