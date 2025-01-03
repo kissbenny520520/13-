@@ -75,6 +75,7 @@
   <h1>大德機車行</h1>
   <h2>13隻大戰</h2>
 
+  <!-- 第一頁：選擇人數 -->
   <section class="player-setup">
     <h2> 玩家數量 </h2>
     <form id="player-count-form">
@@ -88,6 +89,7 @@
     </form>
   </section>
 
+  <!-- 第二頁：輸入玩家名稱 -->
   <section class="player-names" style="display: none;">
     <h2>輸入玩家名稱</h2>
     <form id="player-names-form">
@@ -96,6 +98,7 @@
     </form>
   </section>
 
+  <!-- 第三頁：輸入每場輸贏 -->
   <section class="score-input" style="display: none;">
     <h2>輸入每場輸贏</h2>
     <form id="score-form">
@@ -122,6 +125,7 @@
     <div id="error-message" class="error" style="display: none;"></div>
   </section>
 
+  <!-- 第四頁：顯示每場詳細 -->
   <section class="score-table" style="display: none;">
     <h2>每場詳細</h2>
     <table>
@@ -161,7 +165,7 @@
         document.querySelector('.player-names').style.display = 'none';
         document.querySelector('.score-input').style.display = 'block';
         document.querySelector('.score-table').style.display = 'block';
-        
+
         playerScoresDiv.innerHTML = players.map(player => {
           const totalScore = scores.reduce((sum, round) => sum + (round.scores[players.indexOf(player)] || 0), 0);
           return `
@@ -174,14 +178,14 @@
         }).join('');
 
         playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
-        
+
         updateScoreTable();
       }
     }
 
     function updateScoreTable() {
       scoreRecords.innerHTML = '';
-      
+
       scores.slice().reverse().forEach((round, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `<td>${scores.length - index}</td>` + round.scores.map(score => `<td>${score}</td>`).join('');
@@ -231,7 +235,7 @@
       players = [];
       const selects = document.querySelectorAll('.player-names select');
       const inputs = document.querySelectorAll('.player-names input[type="text"]');
-      
+
       selects.forEach((select, index) => {
         const selectedPlayer = select.value.trim();
         const newPlayer = inputs[index].value.trim();
@@ -267,7 +271,7 @@
     const scoreForm = document.getElementById('score-form');
     scoreForm.addEventListener('submit', function(e) {
       e.preventDefault();
-      
+
       if (!bonusInput.value) {
         errorMessage.style.display = 'block';
         errorMessage.textContent = '請選擇一個彩金';
@@ -282,4 +286,27 @@
       const totalScore = currentScores.reduce((sum, score) => sum + score, 0);
       if (totalScore !== 0) {
         errorMessage.style.display = 'block';
-        errorMessage.textContent = '此場比賽的總分數必須為0，請
+        errorMessage.textContent = '此場比賽的總分數必須為0，請輸入正確的分數';
+        return;
+      }
+
+      scores.push({
+        scores: currentScores,
+        bonus: bonusInput.value
+      });
+
+      localStorage.setItem('scores', JSON.stringify(scores));
+      errorMessage.style.display = 'none';
+      updateScoreTable();
+    });
+
+    resetScoresButton.addEventListener('click', function() {
+      localStorage.removeItem('players');
+      localStorage.removeItem('scores');
+      players = [];
+      scores = [];
+      loadData();
+    });
+  </script>
+</body>
+</html>
