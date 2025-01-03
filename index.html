@@ -63,11 +63,11 @@
       margin-right: 10px;
     }
     .score-input input {
-      width: 5ch; /* 使每個輸入框的寬度適應五個字 */
+      width: 5ch;
     }
     .total-records tr {
       font-weight: bold;
-      color: green; /* 使總計行的字體顯示為粗體綠色 */
+      color: green;
     }
   </style>
 </head>
@@ -129,9 +129,7 @@
         <tr id="player-headers"></tr>
       </thead>
       <tbody id="score-records"></tbody>
-      <tfoot id="total-records">
-        <!-- 總計將會顯示在這裡 -->
-      </tfoot>
+      <tfoot id="total-records"></tfoot>
     </table>
     <button type="button" id="reset-scores" style="margin-top: 40px;">本日輸贏歸零</button>
   </section>
@@ -144,16 +142,13 @@
     const playerHeaders = document.getElementById('player-headers');
     const scoreRecords = document.getElementById('score-records');
     const totalRecords = document.getElementById('total-records');
-    const errorMessage = document.getElementById('error-message');
-    const bonusInput = document.getElementById('bonus');
     const resetScoresButton = document.getElementById('reset-scores');
+    const bonusInput = document.getElementById('bonus');
 
-    const commonPlayers = ["佳穎", "品安", "季村", "小學", "治杰", "小燁"];
     let players = [];
     let scores = [];
 
-    // 當選擇人數後顯示玩家輸入頁面
-    playerCountForm.addEventListener('submit', function(e) {
+    playerCountForm.addEventListener('submit', function (e) {
       e.preventDefault();
       const playerCount = parseInt(document.getElementById('player-count').value, 10);
 
@@ -161,54 +156,42 @@
       for (let i = 0; i < playerCount; i++) {
         playerNameInputsDiv.innerHTML += `
           <label for="player${i + 1}">玩家 ${i + 1} 名字：</label>
-          <select id="player${i + 1}" name="player${i + 1}">
-            <option value="">-- 請選擇常用玩家 --</option>
-            ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
-          </select>
-          <input type="text" id="player${i + 1}-input" placeholder="或輸入新玩家" oninput="clearSelect(${i + 1})">
+          <input type="text" id="player${i + 1}" placeholder="輸入玩家姓名" required>
         `;
       }
       document.querySelector('.player-setup').style.display = 'none';
       document.querySelector('.player-names').style.display = 'block';
     });
 
-    // 清除下拉選單選擇
-    function clearSelect(index) {
-      document.getElementById(`player${index}`).value = '';
-    }
-
-    // 當提交玩家名稱時，處理兩種輸入方式
-    playerNamesForm.addEventListener('submit', function(e) {
+    playerNamesForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      players = [];
-
-      for (let i = 0; i < playerNameInputsDiv.children.length / 2; i++) {
-        const selectValue = document.getElementById(`player${i + 1}`).value.trim();
-        const inputValue = document.getElementById(`player${i + 1}-input`).value.trim();
-
-        if (selectValue || inputValue) {
-          players.push(selectValue || inputValue);
-        } else {
-          alert('請為每位玩家輸入名字或選擇常用玩家！');
-          return;
-        }
+      players = Array.from(document.querySelectorAll('#player-name-inputs input')).map(input => input.value.trim());
+      if (players.includes("")) {
+        alert("所有玩家名稱為必填！");
+        return;
       }
-
-      console.log('已輸入玩家名稱:', players);
       document.querySelector('.player-names').style.display = 'none';
       document.querySelector('.score-input').style.display = 'block';
       document.querySelector('.score-table').style.display = 'block';
+
+      playerHeaders.innerHTML = players.map(player => `<th>${player}</th>`).join('');
+      scores = Array(players.length).fill(0);
+      updateTotals();
     });
 
-    // 加載頁面
-    function loadData() {
-      // 後續邏輯省略，您可以補充
+    resetScoresButton.addEventListener('click', function () {
+      scores = Array(players.length).fill(0);
+      scoreRecords.innerHTML = '';
+      updateTotals();
+    });
+
+    function updateTotals() {
+      totalRecords.innerHTML = `
+        <tr>
+          <td colspan="${players.length}" class="total-heading">總計: ${scores.reduce((a, b) => a + b, 0)}</td>
+        </tr>
+      `;
     }
-
-    // 事件綁定和邏輯
-    // 省略了其他部分，您可按需求加入
-
-    loadData();
   </script>
 </body>
 </html>
