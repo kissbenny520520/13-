@@ -69,10 +69,6 @@
       font-weight: bold;
       color: green;
     }
-    .total-score {
-      color: green;
-      font-weight: bold;
-    }
   </style>
 </head>
 <body>
@@ -153,7 +149,6 @@
     const commonPlayers = ["佳穎", "品安", "季村", "小學", "治杰", "小燁"];
     let players = [];
     let scores = [];
-    let totalScores = [];
 
     playerCountForm.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -187,7 +182,6 @@
     playerNamesForm.addEventListener('submit', function (e) {
       e.preventDefault();
       players = [];
-      totalScores = Array(players.length).fill(0); // Initialize totalScores
       const inputs = document.querySelectorAll('.player-names select, .player-names input');
       inputs.forEach(input => {
         if (input.tagName === 'SELECT' && input.value !== 'new' && input.value) {
@@ -205,7 +199,6 @@
         <div class="player-row">
           <label for="${player}">${player}：</label>
           <input type="number" id="${player}" name="${player}" required>
-          <span id="total-${player}" class="total-score">總積分: 0</span>
         </div>
       `).join('');
 
@@ -214,25 +207,21 @@
     });
 
     function updateScoreTable() {
-      scoreRecords.innerHTML = scores.map((round, index) => `
+      // 倒序顯示每場分數
+      scoreRecords.innerHTML = scores.slice().reverse().map((round, index) => `
         <tr>
-          <td>${index + 1}</td>
+          <td>${scores.length - index}</td>
           ${round.scores.map(score => `<td>${score}</td>`).join('')}
           <td class="bonus-column">${round.bonus}</td>
         </tr>
       `).join('');
       
       const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
-      totalRecords.innerHTML = `<tr>
+      totalRecords.innerHTML = `<tr style="color: green; font-weight: bold;">
         <td>合計</td>
-        ${totalScores.map(total => `<td>${total}</td>`).join('')}
+        ${totalScores.map(total => `<td>(${total})</td>`).join('')}
         <td></td>
       </tr>`;
-      
-      // Update the total score for each player
-      players.forEach((player, i) => {
-        document.getElementById(`total-${player}`).textContent = `總積分: ${totalScores[i]}`;
-      });
     }
 
     document.getElementById('score-form').addEventListener('submit', function (e) {
