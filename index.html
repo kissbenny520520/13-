@@ -215,9 +215,8 @@
           <select id="player${i + 1}" name="player${i + 1}" required>
             <option value="">-- 請選擇或輸入新玩家 --</option>
             ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
-            <option value="new">加入新玩家</option>
           </select>
-          <input type="text" placeholder="或輸入新玩家" oninput="this.previousElementSibling.value=''" style="display:none"/>
+          <input type="text" placeholder="或輸入新玩家" oninput="this.previousElementSibling.value=''" />
         `;
       }
     });
@@ -231,7 +230,7 @@
       selects.forEach((select, index) => {
         const selectedPlayer = select.value.trim();
         const newPlayer = inputs[index].value.trim();
-        players.push(selectedPlayer === 'new' ? newPlayer : selectedPlayer);
+        players.push(selectedPlayer || newPlayer);
       });
 
       if (players.some(name => name === '')) {
@@ -278,32 +277,42 @@
       const totalScore = currentScores.reduce((sum, score) => sum + score, 0);
       if (totalScore !== 0) {
         errorMessage.style.display = 'block';
-        errorMessage.textContent = '此場比賽的總分數必須為0，請重新檢查分數';
+        errorMessage.textContent = '此場比賽的總分數必須為0，請重新檢查分數。';
         return;
+      } else {
+        errorMessage.style.display = 'none';
       }
 
-      scores.push({
-        scores: currentScores,
-        bonus: bonusInput.value
-      });
-
-      localStorage.setItem('scores', JSON.stringify(scores));
+      const bonus = bonusInput.value.trim();
+      scores.push({ scores: currentScores, bonus });
 
       updateScoreTable();
 
-      errorMessage.style.display = 'none';
-      document.getElementById('bonus').value = '';
+      // 即時更新每位玩家的總積分
       players.forEach(player => {
-        document.getElementById(player).value = '';
+        const totalScore = scores.reduce((sum, round) => sum + round.scores[players.indexOf(player)] || 0, 0);
+        document.getElementById(`${player}-total`).textContent = `(${totalScore})`;
       });
+
+      localStorage.setItem('scores', JSON.stringify(scores));
+      scoreForm.reset();
+      bonusInput.value = '';
     });
 
     resetScoresButton.addEventListener('click', function() {
-      localStorage.removeItem('players');
-      localStorage.removeItem('scores');
-      players = [];
-      scores = [];
-      loadData();
+      if (confirm("確定要將本日輸贏歸零嗎？")) {
+        localStorage.removeItem('players');
+        localStorage.removeItem('scores');
+        players = [];
+        scores = [];
+        playerScoresDiv.innerHTML = '';
+        scoreRecords.innerHTML = '';
+        totalRecords.innerHTML = '';
+        document.querySelector('.player-setup').style.display = 'block';
+        document.querySelector('.player-names').style.display = 'none';
+        document.querySelector('.score-input').style.display = 'none';
+        document.querySelector('.score-table').style.display = 'none';
+      }
     });
 
     loadData();
