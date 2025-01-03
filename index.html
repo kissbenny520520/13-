@@ -117,7 +117,7 @@
         <option value="Q">Q</option>
         <option value="K">K</option>
       </select>
-      <button type="submit">新增此場輸贏</button>
+      <button type="submit" id="submit-scores-btn">新增此場輸贏</button>
     </form>
     <div id="error-message" class="error" style="display: none;"></div>
   </section>
@@ -146,6 +146,7 @@
     const totalRecords = document.getElementById('total-records');
     const errorMessage = document.getElementById('error-message');
     const bonusInput = document.getElementById('bonus');
+    const submitScoresButton = document.getElementById('submit-scores-btn');
     const resetScoresButton = document.getElementById('reset-scores');
 
     const commonPlayers = ["佳穎", "品安", "季村", "小學", "治杰", "小燁"];
@@ -264,25 +265,17 @@
       localStorage.setItem('scores', JSON.stringify(scores));
     });
 
-    // 當選擇加入新玩家時顯示輸入框
-    document.addEventListener('change', function(e) {
-      if (e.target.tagName === 'SELECT' && e.target.value === 'new') {
-        const input = e.target.nextElementSibling;
-        input.style.display = 'block';
-      } else if (e.target.tagName === 'SELECT') {
-        const input = e.target.nextElementSibling;
-        input.style.display = 'none';
-      }
-    });
-
-    const scoreForm = document.getElementById('score-form');
     scoreForm.addEventListener('submit', function(e) {
       e.preventDefault();
       
       if (!bonusInput.value) {
         errorMessage.style.display = 'block';
         errorMessage.textContent = '請選擇一個彩金';
+        submitScoresButton.style.display = 'block'; // 確保按鈕顯示
         return;
+      } else {
+        errorMessage.style.display = 'none';
+        submitScoresButton.style.display = 'block'; // 確保按鈕顯示
       }
 
       const currentScores = players.map(player => {
@@ -294,6 +287,7 @@
       if (totalScore !== 0) {
         errorMessage.style.display = 'block';
         errorMessage.textContent = '此場比賽的總分數必須為0，請重新檢查分數。';
+        submitScoresButton.style.display = 'block'; // 確保按鈕顯示
         return;
       } else {
         errorMessage.style.display = 'none';
@@ -304,7 +298,6 @@
 
       updateScoreTable();
 
-      // 即時更新每位玩家的總積分
       players.forEach(player => {
         const totalScore = scores.reduce((sum, round) => sum + round.scores[players.indexOf(player)] || 0, 0);
         document.getElementById(`${player}-total`).textContent = `(${totalScore})`;
