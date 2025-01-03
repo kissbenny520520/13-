@@ -150,6 +150,7 @@
     let players = [];
     let scores = [];
 
+    // 從 localStorage 取得資料
     function loadData() {
       players = JSON.parse(localStorage.getItem('players')) || [];
       scores = JSON.parse(localStorage.getItem('scores')) || [];
@@ -177,6 +178,7 @@
       }
     }
 
+    // 更新成績表格
     function updateScoreTable() {
       scoreRecords.innerHTML = '';
       scores.slice().reverse().forEach((round, index) => {
@@ -215,6 +217,7 @@
           <label for="player${i + 1}">玩家 ${i + 1} 名字：</label>
           <select id="player${i + 1}" name="player${i + 1}" required>
             <option value="">-- 請選擇或輸入新玩家 --</option>
+            ${players.map(player => `<option value="${player}">${player}</option>`).join('')}
             <option value="newPlayer">加入新玩家</option>
           </select>
           <input type="text" placeholder="或輸入新玩家" style="display:none" />
