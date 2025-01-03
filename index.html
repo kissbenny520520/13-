@@ -14,33 +14,60 @@
       color: red;
       font-weight: bold;
     }
+    h1 {
+      margin: 0;
+    }
     .player-setup, .player-names, .score-input, .score-table {
       margin: 20px auto;
       max-width: 600px;
     }
-    label, input, select, button {
+    label, input, button {
       display: block;
       margin: 10px 0;
-    }
-    .new-player-input {
-      margin-top: 10px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 10px;
       text-align: center;
     }
     th {
       background-color: #f4f4f4;
     }
+    .error {
+      color: red;
+      font-size: 14px;
+      text-align: center;
+    }
     .bonus-column {
       color: red;
       font-weight: bold;
+    }
+    .total-heading {
+      text-align: center;
+      color: red;
+      font-weight: bold;
+      font-size: 24px;
+    }
+    .player-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .player-row label,
+    .player-row input,
+    .player-row span {
+      margin-right: 10px;
+    }
+    .score-input input {
+      width: 5ch;
+    }
+    .total-records tr {
+      font-weight: bold;
+      color: green;
     }
   </style>
 </head>
@@ -48,7 +75,6 @@
   <h1>大德機車行</h1>
   <h2>13隻大戰</h2>
 
-  <!-- 第一頁：玩家數量選擇 -->
   <section class="player-setup">
     <h2>玩家數量</h2>
     <form id="player-count-form">
@@ -62,7 +88,6 @@
     </form>
   </section>
 
-  <!-- 第二頁：玩家名稱輸入 -->
   <section class="player-names" style="display: none;">
     <h2>輸入玩家名稱</h2>
     <form id="player-names-form">
@@ -71,13 +96,12 @@
     </form>
   </section>
 
-  <!-- 第三頁：輸入每場輸贏 -->
   <section class="score-input" style="display: none;">
     <h2>輸入每場輸贏</h2>
     <form id="score-form">
       <div id="player-scores"></div>
       <label for="bonus">彩金：</label>
-      <select id="bonus" required>
+      <select id="bonus" name="bonus" required>
         <option value="">-- 請選擇彩金 --</option>
         <option value="A">A</option>
         <option value="2">2</option>
@@ -95,10 +119,9 @@
       </select>
       <button type="submit">新增此場輸贏</button>
     </form>
-    <div id="error-message" style="color: red; display: none;"></div>
+    <div id="error-message" class="error" style="display: none;"></div>
   </section>
 
-  <!-- 第三頁：分數表格 -->
   <section class="score-table" style="display: none;">
     <h2>每場詳細</h2>
     <table>
@@ -108,15 +131,12 @@
       <tbody id="score-records"></tbody>
       <tfoot id="total-records"></tfoot>
     </table>
-    <button type="button" id="reset-scores">本日輸贏歸零</button>
+    <button type="button" id="reset-scores" style="margin-top: 40px;">本日輸贏歸零</button>
   </section>
 
   <script>
     const playerCountForm = document.getElementById('player-count-form');
     const playerNamesForm = document.getElementById('player-names-form');
-    const scoreForm = document.getElementById('score-form');
-    const resetScoresButton = document.getElementById('reset-scores');
-
     const playerNameInputsDiv = document.getElementById('player-name-inputs');
     const playerScoresDiv = document.getElementById('player-scores');
     const playerHeaders = document.getElementById('player-headers');
@@ -124,107 +144,106 @@
     const totalRecords = document.getElementById('total-records');
     const errorMessage = document.getElementById('error-message');
     const bonusInput = document.getElementById('bonus');
+    const resetScoresButton = document.getElementById('reset-scores');
 
     const commonPlayers = ["佳穎", "品安", "季村", "小學", "治杰", "小燁"];
     let players = [];
     let scores = [];
 
-    // 第一頁：選擇玩家數量
-    playerCountForm.addEventListener('submit', function (e) {
+    function loadData() {
+      players = JSON.parse(localStorage.getItem('players')) || [];
+      scores = JSON.parse(localStorage.getItem('scores')) || [];
+
+      if (players.length > 0) {
+        document.querySelector('.player-setup').style.display = 'none';
+        document.querySelector('.player-names').style.display = 'none';
+        document.querySelector('.score-input').style.display = 'block';
+        document.querySelector('.score-table').style.display = 'block';
+        
+        playerScoresDiv.innerHTML = players.map(player => `
+          <div class="player-row">
+            <label for="${player}">${player}：</label>
+            <input type="number" id="${player}" name="${player}" required>
+          </div>
+        `).join('');
+        playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + `<th class="bonus-column">彩金</th>`;
+        updateScoreTable();
+      }
+    }
+
+    function updateScoreTable() {
+      scoreRecords.innerHTML = scores.slice().reverse().map((round, index) => `
+        <tr>
+          <td>${scores.length - index}</td>
+          ${round.scores.map(score => `<td>${score}</td>`).join('')}
+          <td class="bonus-column">${round.bonus}</td>
+        </tr>
+      `).join('');
+      const totalScores = players.map((_, i) => scores.reduce((sum, round) => sum + round.scores[i], 0));
+      totalRecords.innerHTML = `<tr>
+        <td>合計</td>
+        ${totalScores.map(score => `<td>${score}</td>`).join('')}
+      </tr>`;
+    }
+
+    playerCountForm.addEventListener('submit', function(e) {
       e.preventDefault();
       const playerCount = parseInt(document.getElementById('player-count').value, 10);
-
       document.querySelector('.player-setup').style.display = 'none';
       document.querySelector('.player-names').style.display = 'block';
 
       playerNameInputsDiv.innerHTML = '';
       for (let i = 0; i < playerCount; i++) {
         playerNameInputsDiv.innerHTML += `
-          <label for="player${i + 1}">玩家 ${i + 1} 名字：</label>
-          <select id="player${i + 1}" required>
-            <option value="">-- 請選擇或加入新玩家 --</option>
+          <label for="player${i}">玩家 ${i + 1} 名字：</label>
+          <select id="player${i}" name="player${i}" required onchange="toggleNewPlayerInput(this, ${i})">
+            <option value="">-- 請選擇 --</option>
             ${commonPlayers.map(player => `<option value="${player}">${player}</option>`).join('')}
             <option value="new">加入新玩家</option>
           </select>
-          <div class="new-player-input" id="new-player-input${i + 1}" style="display: none;">
-            <label for="new-player-name${i + 1}">新玩家名稱：</label>
-            <input type="text" id="new-player-name${i + 1}" placeholder="請輸入新玩家名稱" />
-          </div>
+          <input type="text" id="new-player${i}" name="new-player${i}" style="display:none;" placeholder="輸入新玩家名稱">
         `;
       }
     });
 
-    // 偵測下拉選單變更
-    playerNamesForm.addEventListener('change', function (e) {
-      const selectElement = e.target;
-      if (selectElement.tagName === 'SELECT' && selectElement.value === 'new') {
-        const newPlayerInputDiv = selectElement.nextElementSibling;
-        if (newPlayerInputDiv) {
-          newPlayerInputDiv.style.display = 'block';
-        }
-      } else if (selectElement.tagName === 'SELECT') {
-        const newPlayerInputDiv = selectElement.nextElementSibling;
-        if (newPlayerInputDiv) {
-          newPlayerInputDiv.style.display = 'none';
-        }
+    function toggleNewPlayerInput(select, index) {
+      const input = document.getElementById(`new-player${index}`);
+      if (select.value === 'new') {
+        input.style.display = 'block';
+        input.required = true;
+      } else {
+        input.style.display = 'none';
+        input.required = false;
       }
-    });
+    }
 
-    // 第二頁：提交玩家名稱
-    playerNamesForm.addEventListener('submit', function (e) {
+    playerNamesForm.addEventListener('submit', function(e) {
       e.preventDefault();
       players = [];
-
       for (let i = 0; i < playerNameInputsDiv.children.length; i += 3) {
-        const selectElement = playerNameInputsDiv.children[i + 1];
-        const newPlayerInputDiv = playerNameInputsDiv.children[i + 2];
-        const newPlayerInput = newPlayerInputDiv.querySelector('input');
-
-        const selectedPlayer = selectElement.value;
-        const newPlayer = newPlayerInput.value.trim();
-
-        if (selectedPlayer === 'new' && newPlayer) {
-          players.push(newPlayer);
-        } else if (selectedPlayer) {
-          players.push(selectedPlayer);
-        } else {
-          alert('請選擇或輸入所有玩家名稱');
-          return;
+        const select = playerNameInputsDiv.children[i + 1];
+        const input = playerNameInputsDiv.children[i + 2];
+        if (select.value === 'new' && input.value.trim()) {
+          players.push(input.value.trim());
+        } else if (select.value) {
+          players.push(select.value);
         }
       }
-
+      localStorage.setItem('players', JSON.stringify(players));
       document.querySelector('.player-names').style.display = 'none';
       document.querySelector('.score-input').style.display = 'block';
       document.querySelector('.score-table').style.display = 'block';
-
-      playerScoresDiv.innerHTML = players.map(player => `
-        <label for="${player}">${player}：</label>
-        <input type="number" id="${player}" required>
-      `).join('');
-
-      playerHeaders.innerHTML = `<th>場次</th>` + players.map(player => `<th>${player}</th>`).join('') + '<th class="bonus-column">彩金</th>';
+      loadData();
     });
 
-    // 第三頁：新增比賽成績
-    scoreForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const currentScores = players.map(player => {
-        const score = parseInt(document.getElementById(player).value, 10);
-        return isNaN(score) ? 0 : score;
-      });
-
-      const totalScore = currentScores.reduce((sum, score) => sum + score, 0);
-      if (totalScore !== 0) {
-        errorMessage.style.display = 'block';
-        errorMessage.textContent = '此場比賽的總分數必須為 0，請重新檢查分數。';
-        return;
+    resetScoresButton.addEventListener('click', function() {
+      if (confirm("確定要將本日輸贏歸零嗎？")) {
+        localStorage.clear();
+        location.reload();
       }
-
-      errorMessage.style.display = 'none';
-      scores.push({ scores: currentScores, bonus: bonusInput.value });
-      bonusInput.value = '';
-
-      updateScoreTable();
     });
 
-    // 更新分數表格
+    loadData();
+  </script>
+</body>
+</html>
