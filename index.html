@@ -266,4 +266,30 @@
 
     // 當選擇加入新玩家時顯示輸入框
     document.addEventListener('change', function(e) {
-      if (e.target.tagName === 'SELECT' && e.target.value === 'new
+      if (e.target.tagName === 'SELECT' && e.target.value === 'new') {
+        const inputField = e.target.nextElementSibling;
+        inputField.style.display = 'block';
+      } else if (e.target.tagName === 'SELECT') {
+        const inputField = e.target.nextElementSibling;
+        inputField.style.display = 'none';
+      }
+    });
+
+    bonusInput.addEventListener('change', function() {
+      // 確保按鈕顯示，彩金選擇後按鈕應該正常顯示
+      const bonusValue = bonusInput.value;
+      if (bonusValue) {
+        errorMessage.style.display = 'none';
+      }
+    });
+    
+    resetScoresButton.addEventListener('click', function() {
+      localStorage.removeItem('players');
+      localStorage.removeItem('scores');
+      location.reload();
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
